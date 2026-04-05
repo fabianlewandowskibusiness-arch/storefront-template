@@ -1,0 +1,288 @@
+{
+  "meta": {
+    "schemaVersion": "1.0",
+    "templateKey": "one-product-dtc",
+    "templateVersion": "1.0"
+  },
+  "brand": {
+    "brandName": "SennaRest",
+    "productName": "SennaRest Poduszka Ortopedyczna",
+    "tagline": "Lepszy sen zaczyna sie od odpowiedniego wsparcia",
+    "language": "pl",
+    "tone": "premium-calm"
+  },
+  "theme": {
+    "palette": {
+      "background": "#ffffff",
+      "surface": "#f8fafc",
+      "primary": "#0f172a",
+      "accent": "#6366f1",
+      "accentSoft": "#eef2ff",
+      "success": "#16a34a",
+      "warning": "#f59e0b",
+      "text": "#111827",
+      "textMuted": "#6b7280",
+      "border": "#e5e7eb"
+    },
+    "style": {
+      "radius": "xl",
+      "shadow": "soft",
+      "spacing": "comfortable",
+      "heroVariant": "split-image",
+      "buttonVariant": "rounded-solid"
+    }
+  },
+  "product": {
+    "name": "SennaRest Poduszka Ortopedyczna",
+    "category": "sleep-product",
+    "price": {
+      "amount": 189,
+      "currency": "PLN",
+      "compareAtAmount": 279
+    },
+    "primaryImage": "/images/product-main.jpg",
+    "gallery": [
+      "/images/product-detail-1.jpg",
+      "/images/product-detail-2.jpg"
+    ],
+    "badges": [
+      "Darmowa dostawa",
+      "30 dni na zwrot",
+      "Bestseller 2025"
+    ]
+  },
+  "hero": {
+    "eyebrow": "Nowosci w kategorii sen",
+    "headline": "Obudz sie bez bolu karku i plecow",
+    "subheadline": "Ergonomiczna poduszka z pianki memory dopasowuje sie do Twojego ciala i zapewnia optymalne podparcie przez cala noc.",
+    "primaryCta": {
+      "label": "Zamow teraz",
+      "href": "#offer"
+    },
+    "secondaryCta": {
+      "label": "Dowiedz sie wiecej",
+      "href": "#benefits"
+    },
+    "benefitBullets": [
+      "Redukcja bolu karku juz od pierwszej nocy",
+      "Pianka memory z certyfikatem OEKO-TEX",
+      "30 dni na bezplatny zwrot"
+    ]
+  },
+  "announcementBar": {
+    "enabled": true,
+    "text": "Darmowa dostawa na wszystkie zamowienia + 30 dni na zwrot"
+  },
+  "trustBar": {
+    "items": [
+      "Darmowa dostawa",
+      "30 dni na zwrot",
+      "Bezpieczne platnosci",
+      "Ponad 5000 zadowolonych klientow"
+    ]
+  },
+  "benefits": {
+    "title": "Dlaczego SennaRest?",
+    "items": [
+      {
+        "title": "Ergonomiczny ksztalt",
+        "description": "Zaprojektowana we wspolpracy z fizjoterapeutami, dopasowuje sie do naturalnej krzywizny szyi."
+      },
+      {
+        "title": "Pianka Memory Premium",
+        "description": "Reaguje na temperature ciala i precyzyjnie dopasowuje sie do Twojej pozycji snu."
+      },
+      {
+        "title": "Oddychajacy pokrowiec",
+        "description": "Wykonany z bambusowego materialu, ktory reguluje temperature i odprowadza wilgoc."
+      },
+      {
+        "title": "Dla kazdej pozycji snu",
+        "description": "Odpowiednia zarowno dla osob spiacych na boku, plecach jak i brzuchu."
+      },
+      {
+        "title": "Certyfikowana jakosc",
+        "description": "Posiada certyfikat OEKO-TEX Standard 100 — bezpieczna dla zdrowia i srodowiska."
+      },
+      {
+        "title": "Latwa pielegnacja",
+        "description": "Pokrowiec mozna zdejmowac i prac w pralce w temperaturze 40 stopni C."
+      }
+    ]
+  },
+  "problem": {
+    "title": "Czy budzisz sie z bolem karku?",
+    "description": "Nieodpowiednia poduszka to jedna z najczestszych przyczyn bolu karku, sztywnosci plecow i niewyspania. Tradycyjne poduszki tracaja swoj ksztalt i przestaja wspierac kregoslup szyjny juz po kilku miesiacach uzytkowania.",
+    "painPoints": [
+      "Bol karku i ramion po przebudzeniu",
+      "Problemy z zasnieciem i czeste budzenie sie w nocy",
+      "Chroniczne zmeczenie mimo dlugiego snu",
+      "Poduszka ktora traci ksztalt i sie splaszcza"
+    ]
+  },
+  "features": {
+    "title": "Co wyroznia SennaRest?",
+    "items": [
+      {
+        "name": "Technologia Adaptive Support",
+        "description": "Dwustrefowy rdzen z pianki memory zapewnia miekkie podparcie glowy i mocniejsze wsparcie dla szyi."
+      },
+      {
+        "name": "Regulowana wysokosc",
+        "description": "Dodatkowe wkladki pozwalaja dostosowac wysokosc poduszki do indywidualnych potrzeb."
+      },
+      {
+        "name": "Pokrowiec z wlokna bambusowego",
+        "description": "Naturalnie antybakteryjny i hipoalergiczny material, idealny dla alergikow."
+      },
+      {
+        "name": "Trwalosc na lata",
+        "description": "Pianka memory zachowuje swoje wlasciwosci przez minimum 3 lata regularnego uzytkowania."
+      }
+    ]
+  },
+  "comparison": {
+    "title": "SennaRest vs typowa poduszka",
+    "rows": [
+      {
+        "label": "Material",
+        "ours": "Pianka memory premium",
+        "other": "Polyester / pierze"
+      },
+      {
+        "label": "Wsparcie szyi",
+        "ours": "Ergonomiczne, dwustrefowe",
+        "other": "Brak lub minimalne"
+      },
+      {
+        "label": "Trwalosc",
+        "ours": "3+ lata",
+        "other": "6-12 miesiecy"
+      },
+      {
+        "label": "Regulacja wysokosci",
+        "ours": "Tak, wkladki w zestawie",
+        "other": "Brak"
+      },
+      {
+        "label": "Certyfikaty",
+        "ours": "OEKO-TEX Standard 100",
+        "other": "Brak"
+      }
+    ]
+  },
+  "testimonials": {
+    "title": "Co mowia nasi klienci?",
+    "items": [
+      {
+        "name": "Anna K.",
+        "quote": "Od kiedy uzywam SennaRest, bol karku praktycznie zniknal. Budzenie sie rano jest zupelnie inne — czuje sie wypoczeta i pelna energii.",
+        "avatar": "/images/placeholder-avatar-1.jpg"
+      },
+      {
+        "name": "Marek W.",
+        "quote": "Probowalem wielu poduszek ortopedycznych, ale ta jest naprawde inna. Spi mi sie fenomenalnie, a poduszka wciaz trzyma ksztalt.",
+        "avatar": "/images/placeholder-avatar-2.jpg"
+      },
+      {
+        "name": "Kasia L.",
+        "quote": "Kupilem jedna dla siebie i od razu zamowilem druga dla zony. Rewelacyjna jakosc wykonania i super szybka dostawa."
+      }
+    ]
+  },
+  "offer": {
+    "anchorId": "offer",
+    "title": "Zamow SennaRest w promocyjnej cenie",
+    "priceLabel": "Cena promocyjna",
+    "cta": {
+      "label": "Kupuje teraz — 189 zl"
+    },
+    "included": [
+      "Poduszka ortopedyczna SennaRest",
+      "Dodatkowe wkladki regulujace wysokosc",
+      "Bambusowy pokrowiec (mozna prac)",
+      "Eleganckie opakowanie prezentowe",
+      "Darmowa dostawa kurierem"
+    ],
+    "guaranteeText": "Bezpieczne platnosci. 30 dni na zwrot bez podawania przyczyny."
+  },
+  "faq": {
+    "title": "Czeste pytania",
+    "items": [
+      {
+        "question": "Czy poduszka nadaje sie do spania na boku?",
+        "answer": "Tak, SennaRest jest zaprojektowana dla wszystkich pozycji snu. Ergonomiczny ksztalt zapewnia prawidlowe ustawienie kregoslupa szyjnego zarowno podczas snu na boku, plecach jak i brzuchu."
+      },
+      {
+        "question": "Jak dbac o poduszke?",
+        "answer": "Pokrowiec bambusowy mozna zdejmowac i prac w pralce w temperaturze do 40 stopni C. Rdzen z pianki memory nalezy przewietrzac raz na kilka miesiecy."
+      },
+      {
+        "question": "Ile trwa dostawa?",
+        "answer": "Wysylamy zamowienia w ciagu 24 godzin od zlozenia. Standardowa dostawa kurierem zajmuje 1-2 dni robocze. Dostawa jest calkowicie bezplatna."
+      },
+      {
+        "question": "Czy moge zwrocic poduszke jesli mi nie odpowiada?",
+        "answer": "Oczywiscie. Masz 30 dni na przetestowanie poduszki. Jesli nie bedzie Ci odpowiadala, wystarczy skontaktowac sie z nami i odeSlemy kuriera po odbiore — zwrot kosztow w ciagu 5 dni roboczych."
+      },
+      {
+        "question": "Czy poduszka ma nieprzyjemny zapach?",
+        "answer": "Pianka memory moze miec delikatny zapach po rozpakowaniu, ktory calkowicie znika w ciagu 24-48 godzin. To normalne zjawisko i nie wplywa na jakosc produktu."
+      }
+    ]
+  },
+  "finalCta": {
+    "headline": "Zacznij spac lepiej juz dzis",
+    "subheadline": "Dolacz do ponad 5000 osob, ktore odzyskaly zdrowy sen dzieki SennaRest.",
+    "buttonLabel": "Zamow z darmowa dostawa"
+  },
+  "footer": {
+    "links": [
+      {
+        "label": "Polityka prywatnosci",
+        "href": "/privacy"
+      },
+      {
+        "label": "Regulamin",
+        "href": "/terms"
+      },
+      {
+        "label": "Zwroty i reklamacje",
+        "href": "/returns"
+      }
+    ],
+    "contactEmail": "kontakt@sennarest.pl"
+  },
+  "commerce": {
+    "provider": "woocommerce",
+    "woocommerce": {
+      "storeUrl": "https://sklep.sennarest.pl",
+      "productId": 101,
+      "variationId": null,
+      "productUrl": "https://sklep.sennarest.pl/produkt/poduszka-ortopedyczna",
+      "checkoutMode": "add_to_cart_redirect"
+    },
+    "cta": {
+      "buttonLabel": "Kup teraz",
+      "showQuantitySelector": false
+    }
+  },
+  "analytics": {
+    "provider": "custom",
+    "enabled": true
+  },
+  "sections": [
+    { "type": "announcementBar", "enabled": true },
+    { "type": "hero", "enabled": true },
+    { "type": "trustBar", "enabled": true },
+    { "type": "benefits", "enabled": true },
+    { "type": "problem", "enabled": true },
+    { "type": "features", "enabled": true },
+    { "type": "comparison", "enabled": true },
+    { "type": "testimonials", "enabled": true },
+    { "type": "offer", "enabled": true },
+    { "type": "faq", "enabled": true },
+    { "type": "finalCta", "enabled": true },
+    { "type": "footer", "enabled": true }
+  ]
+}
