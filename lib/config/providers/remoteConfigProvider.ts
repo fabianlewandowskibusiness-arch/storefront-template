@@ -5,6 +5,10 @@ import type { StorefrontConfig } from "@/types/storefront";
 const DEFAULT_API_URL = "https://api.ecommerce-flow.ai";
 const REVALIDATE_SECONDS = 60;
 
+function log(storeId: string, message: string, ...args: unknown[]) {
+  console.error(`[storefront][store:${storeId}] ${message}`, ...args);
+}
+
 export async function loadRemoteConfig(): Promise<StorefrontConfig> {
   const storeId = process.env.STORE_ID;
   const apiUrl = (process.env.STOREFRONT_API_URL || DEFAULT_API_URL).replace(/\/$/, "");
@@ -19,25 +23,25 @@ export async function loadRemoteConfig(): Promise<StorefrontConfig> {
   try {
     response = await fetch(url, {
       next: { revalidate: REVALIDATE_SECONDS },
-      headers: {
-        Accept: "application/json",
-        "X-Store-Id": storeId,
-      },
+      headers: { Accept: "application/json" },
     });
   } catch (error) {
-    console.error(`[storefront] Network error fetching config for store "${storeId}":`, error);
+    log(storeId, "Network error fetching config:", error);
     redirect("/store-unavailable");
   }
 
   if (response.status === 404) {
-    console.error(`[storefront] Store not found: "${storeId}"`);
+    log(storeId, "Store not found (404)");
     redirect("/store-not-found");
   }
 
+  if (response.status === 401 || response.status === 403) {
+    log(storeId, `Unexpected auth error (${response.status}) on public endpoint — check backend configuration`);
+    redirect("/store-unavailable");
+  }
+
   if (!response.ok) {
-    console.error(
-      `[storefront] API error for store "${storeId}": ${response.status} ${response.statusText}`
-    );
+    log(storeId, `API error: ${response.status} ${response.statusText}`);
     redirect("/store-unavailable");
   }
 
@@ -45,7 +49,7 @@ export async function loadRemoteConfig(): Promise<StorefrontConfig> {
   try {
     raw = await response.json();
   } catch {
-    console.error(`[storefront] Invalid JSON response for store "${storeId}"`);
+    log(storeId, "Response is not valid JSON");
     redirect("/config-error");
   }
 
@@ -54,7 +58,7 @@ export async function loadRemoteConfig(): Promise<StorefrontConfig> {
     const formatted = result.error.issues
       .map((i) => `  - ${i.path.join(".")}: ${i.message}`)
       .join("\n");
-    console.error(`[storefront] Config validation failed for store "${storeId}":\n${formatted}`);
+    log(storeId, `Config validation failed:\n${formatted}`);
     redirect("/config-error");
   }
 
