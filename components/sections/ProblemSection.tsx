@@ -3,24 +3,22 @@ import SectionShell from "@/components/layout/SectionShell";
 import SectionHeading from "@/components/ui/SectionHeading";
 
 interface ProblemSectionProps {
-  config: {
-    title: string;
-    description: string;
-    painPoints: string[];
-  };
+  title: string;
+  description: string;
+  painPoints: string[];
 }
 
-export default function ProblemSection({ config }: ProblemSectionProps) {
+export default function ProblemSection({ title, description, painPoints }: ProblemSectionProps) {
   return (
     <SectionShell background="surface">
       <Container narrow>
-        <SectionHeading title={config.title} />
+        <SectionHeading title={title} />
         <p className="text-center text-[var(--color-text-muted)] text-base md:text-lg leading-relaxed mb-10">
-          {config.description}
+          {description}
         </p>
-        {config.painPoints.length > 0 && (
+        {painPoints.length > 0 && (
           <div className="space-y-4 max-w-xl mx-auto">
-            {config.painPoints.map((point, i) => (
+            {painPoints.map((point, i) => (
               <div
                 key={i}
                 className="flex items-start gap-3 bg-[var(--color-background)] border border-[var(--color-border)] rounded-[var(--radius)] p-4 shadow-[var(--shadow)]"

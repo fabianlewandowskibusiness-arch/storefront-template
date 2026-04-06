@@ -5,8 +5,8 @@ export interface CommerceProvider {
 
 export interface WooCommerceConfig {
   storeUrl: string;
-  productId: number;
-  variationId?: number | null;
+  productId: string;
+  variationId?: string | null;
   productUrl?: string;
-  checkoutMode: "add_to_cart_redirect" | "direct_checkout";
+  checkoutMode: string;
 }

@@ -7,28 +7,27 @@ export function createWooCommerceProvider(config: WooCommerceConfig): CommercePr
   function getAddToCartUrl(options?: { quantity?: number }): string {
     const qty = options?.quantity ?? 1;
     const params = new URLSearchParams({
-      "add-to-cart": String(productId),
+      "add-to-cart": productId,
       quantity: String(qty),
     });
     if (variationId) {
-      params.set("variation_id", String(variationId));
+      params.set("variation_id", variationId);
     }
     return `${baseUrl}/?${params.toString()}`;
   }
 
   function getCheckoutUrl(options?: { quantity?: number }): string {
-    if (checkoutMode === "direct_checkout") {
+    if (checkoutMode === "DIRECT_CHECKOUT") {
       const qty = options?.quantity ?? 1;
       const params = new URLSearchParams({
-        "add-to-cart": String(productId),
+        "add-to-cart": productId,
         quantity: String(qty),
       });
       if (variationId) {
-        params.set("variation_id", String(variationId));
+        params.set("variation_id", variationId);
       }
       return `${baseUrl}/checkout/?${params.toString()}`;
     }
-    // add_to_cart_redirect — add to cart, WooCommerce handles redirect
     return productUrl || getAddToCartUrl(options);
   }
 

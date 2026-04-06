@@ -3,19 +3,17 @@ import SectionShell from "@/components/layout/SectionShell";
 import SectionHeading from "@/components/ui/SectionHeading";
 
 interface FeaturesSectionProps {
-  config: {
-    title: string;
-    items: { name: string; description: string }[];
-  };
+  title: string;
+  items: { name: string; description: string }[];
 }
 
-export default function FeaturesSection({ config }: FeaturesSectionProps) {
+export default function FeaturesSection({ title, items }: FeaturesSectionProps) {
   return (
     <SectionShell>
       <Container>
-        <SectionHeading title={config.title} />
+        <SectionHeading title={title} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {config.items.map((item, i) => (
+          {items.map((item, i) => (
             <div key={i} className="flex gap-4 items-start">
               <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--color-accent-soft)] flex items-center justify-center text-[var(--color-accent)] font-bold text-sm">
                 {i + 1}

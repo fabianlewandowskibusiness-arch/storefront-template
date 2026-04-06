@@ -1,17 +1,15 @@
-import type { StorefrontConfig } from "@/types/storefront";
+import type { CommerceConfig } from "@/types/storefront";
 import type { CommerceProvider } from "./types";
 import { createWooCommerceProvider } from "./woocommerce";
 
-export function createCommerceProvider(config: StorefrontConfig): CommerceProvider | null {
-  const { commerce } = config;
-
-  if (commerce.provider === "woocommerce" && commerce.woocommerce) {
+export function createCommerceProvider(commerce: CommerceConfig): CommerceProvider | null {
+  if (commerce.provider === "woocommerce") {
     return createWooCommerceProvider({
-      storeUrl: commerce.woocommerce.storeUrl,
-      productId: commerce.woocommerce.productId,
-      variationId: commerce.woocommerce.variationId,
-      productUrl: commerce.woocommerce.productUrl,
-      checkoutMode: commerce.woocommerce.checkoutMode,
+      storeUrl: commerce.storeUrl,
+      productId: commerce.productId,
+      variationId: commerce.variationId,
+      productUrl: commerce.productUrl,
+      checkoutMode: commerce.checkoutMode,
     });
   }
 

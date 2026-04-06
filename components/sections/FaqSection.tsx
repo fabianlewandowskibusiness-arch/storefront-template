@@ -7,18 +7,16 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import { trackFaqOpen } from "@/lib/analytics/tracking";
 
 interface FaqSectionProps {
-  config: {
-    title: string;
-    items: { question: string; answer: string }[];
-  };
+  title: string;
+  items: { question: string; answer: string }[];
 }
 
-export default function FaqSection({ config }: FaqSectionProps) {
+export default function FaqSection({ title, items }: FaqSectionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   function toggle(i: number) {
     if (openIndex !== i) {
-      trackFaqOpen(config.items[i].question);
+      trackFaqOpen(items[i].question);
     }
     setOpenIndex(openIndex === i ? null : i);
   }
@@ -26,9 +24,9 @@ export default function FaqSection({ config }: FaqSectionProps) {
   return (
     <SectionShell background="surface">
       <Container narrow>
-        <SectionHeading title={config.title} />
+        <SectionHeading title={title} />
         <div className="space-y-3">
-          {config.items.map((item, i) => (
+          {items.map((item, i) => (
             <div
               key={i}
               className="bg-[var(--color-background)] border border-[var(--color-border)] rounded-[var(--radius)] overflow-hidden shadow-[var(--shadow)]"

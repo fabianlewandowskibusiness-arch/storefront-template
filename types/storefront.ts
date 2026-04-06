@@ -3,53 +3,77 @@ import type { storefrontConfigSchema } from "@/lib/config/schema";
 
 export type StorefrontConfig = z.infer<typeof storefrontConfigSchema>;
 
+export type PageType = string;
+
 export type SectionType =
-  | "announcementBar"
-  | "hero"
-  | "trustBar"
-  | "benefits"
-  | "problem"
-  | "features"
-  | "comparison"
-  | "testimonials"
-  | "offer"
-  | "faq"
-  | "finalCta"
-  | "footer";
+  | "ANNOUNCEMENT_BAR"
+  | "HERO"
+  | "TRUST_BAR"
+  | "BENEFITS"
+  | "PROBLEM"
+  | "FEATURES"
+  | "COMPARISON"
+  | "TESTIMONIALS"
+  | "OFFER"
+  | "FAQ"
+  | "CTA"
+  | "FOOTER";
 
-export interface SectionEntry {
+export interface StorefrontBlock {
+  id: string;
+  type: string;
+  settings: Record<string, unknown>;
+}
+
+export interface StorefrontSection {
+  id: string;
   type: SectionType;
+  position: number;
+  settings: Record<string, unknown>;
+  blocks: StorefrontBlock[];
+}
+
+export interface StorefrontPage {
+  type: PageType;
+  title: string;
+  slug: string;
+  sections: StorefrontSection[];
+}
+
+export interface ThemeConfig {
+  primaryColor: string;
+  backgroundColor: string;
+  surfaceColor: string;
+  textColor: string;
+  mutedTextColor: string;
+  accentColor: string;
+  accentSoftColor: string;
+  successColor: string;
+  warningColor: string;
+  borderColor: string;
+  radius: string;
+  shadow: string;
+  spacing: string;
+}
+
+export interface BrandingConfig {
+  storeName: string;
+  productName: string;
+  tagline: string;
+  language: string;
+}
+
+export interface CommerceConfig {
+  provider: string;
+  storeUrl: string;
+  productUrl: string;
+  productId: string;
+  variationId?: string | null;
+  checkoutMode: string;
+  ctaButtonLabel: string;
+}
+
+export interface AnalyticsConfig {
+  provider: string;
   enabled: boolean;
-}
-
-export interface CtaConfig {
-  label: string;
-  href?: string;
-}
-
-export interface PriceConfig {
-  amount: number;
-  currency: string;
-  compareAtAmount?: number | null;
-}
-
-export interface ThemePalette {
-  background: string;
-  surface: string;
-  primary: string;
-  accent: string;
-  accentSoft: string;
-  success: string;
-  warning: string;
-  text: string;
-  textMuted: string;
-  border: string;
-}
-
-export interface ThemeStyle {
-  radius: "none" | "sm" | "md" | "lg" | "xl" | "full";
-  shadow: "none" | "soft" | "medium" | "strong";
-  spacing: "compact" | "comfortable" | "spacious";
-  heroVariant: "split-image" | "centered" | "full-bleed";
-  buttonVariant: "rounded-solid" | "sharp-solid" | "rounded-outline" | "pill";
 }

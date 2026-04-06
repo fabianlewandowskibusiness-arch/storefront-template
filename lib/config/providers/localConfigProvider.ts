@@ -1,5 +1,4 @@
 import { storefrontConfigSchema } from "../schema";
-import { normalizeStorefrontConfig } from "../normalizeStorefrontConfig";
 import type { StorefrontConfig } from "@/types/storefront";
 
 export async function loadLocalConfig(): Promise<StorefrontConfig> {
@@ -14,5 +13,5 @@ export async function loadLocalConfig(): Promise<StorefrontConfig> {
     throw new Error(`Invalid local storefront config:\n${formatted}`);
   }
 
-  return normalizeStorefrontConfig(result.data);
+  return result.data;
 }

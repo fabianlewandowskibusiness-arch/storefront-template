@@ -1,17 +1,12 @@
 import Container from "@/components/layout/Container";
 
 interface FooterSectionProps {
-  config: {
-    links: { label: string; href: string }[];
-    contactEmail: string;
-  };
-  brand: {
-    brandName: string;
-    productName: string;
-  };
+  storeName: string;
+  contactEmail: string;
+  links: { label: string; href: string }[];
 }
 
-export default function FooterSection({ config, brand }: FooterSectionProps) {
+export default function FooterSection({ storeName, contactEmail, links }: FooterSectionProps) {
   const year = new Date().getFullYear();
 
   return (
@@ -19,12 +14,12 @@ export default function FooterSection({ config, brand }: FooterSectionProps) {
       <Container>
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-center md:text-left">
-            <p className="font-semibold text-white text-sm">{brand.brandName}</p>
-            <p className="text-xs mt-1">&copy; {year} {brand.brandName}. Wszelkie prawa zastrzezone.</p>
+            <p className="font-semibold text-white text-sm">{storeName}</p>
+            <p className="text-xs mt-1">&copy; {year} {storeName}. Wszelkie prawa zastrzeżone.</p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-4 text-xs">
-            {config.links.map((link, i) => (
+            {links.map((link, i) => (
               <a
                 key={i}
                 href={link.href}
@@ -33,12 +28,12 @@ export default function FooterSection({ config, brand }: FooterSectionProps) {
                 {link.label}
               </a>
             ))}
-            {config.contactEmail && (
+            {contactEmail && (
               <a
-                href={`mailto:${config.contactEmail}`}
+                href={`mailto:${contactEmail}`}
                 className="hover:text-white transition-colors underline-offset-2 hover:underline"
               >
-                {config.contactEmail}
+                {contactEmail}
               </a>
             )}
           </div>

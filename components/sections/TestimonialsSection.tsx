@@ -4,19 +4,17 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import Card from "@/components/ui/Card";
 
 interface TestimonialsSectionProps {
-  config: {
-    title: string;
-    items: { name: string; quote: string; avatar?: string }[];
-  };
+  title: string;
+  items: { name: string; quote: string; avatar?: string }[];
 }
 
-export default function TestimonialsSection({ config }: TestimonialsSectionProps) {
+export default function TestimonialsSection({ title, items }: TestimonialsSectionProps) {
   return (
     <SectionShell>
       <Container>
-        <SectionHeading title={config.title} />
+        <SectionHeading title={title} />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {config.items.map((item, i) => (
+          {items.map((item, i) => (
             <Card key={i} className="flex flex-col">
               <div className="flex items-center gap-3 mb-4">
                 {item.avatar ? (

@@ -3,20 +3,18 @@ import SectionShell from "@/components/layout/SectionShell";
 import SectionHeading from "@/components/ui/SectionHeading";
 
 interface ComparisonSectionProps {
-  config: {
-    title: string;
-    rows: { label: string; ours: string; other: string }[];
-  };
+  title: string;
   brandName: string;
+  rows: { label: string; ours: string; other: string }[];
 }
 
-export default function ComparisonSection({ config, brandName }: ComparisonSectionProps) {
-  if (config.rows.length === 0) return null;
+export default function ComparisonSection({ title, brandName, rows }: ComparisonSectionProps) {
+  if (rows.length === 0) return null;
 
   return (
     <SectionShell background="surface">
       <Container>
-        <SectionHeading title={config.title} />
+        <SectionHeading title={title} />
         <div className="overflow-x-auto">
           <table className="w-full max-w-2xl mx-auto text-sm md:text-base">
             <thead>
@@ -31,7 +29,7 @@ export default function ComparisonSection({ config, brandName }: ComparisonSecti
               </tr>
             </thead>
             <tbody>
-              {config.rows.map((row, i) => (
+              {rows.map((row, i) => (
                 <tr
                   key={i}
                   className="border-b border-[var(--color-border)] last:border-b-0"
