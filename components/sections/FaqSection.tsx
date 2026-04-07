@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import Container from "@/components/layout/Container";
-import SectionShell from "@/components/layout/SectionShell";
+import SectionShell, { type ShellOverride } from "@/components/layout/SectionShell";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { trackFaqOpen } from "@/lib/analytics/tracking";
 
 interface FaqSectionProps {
   title: string;
   items: { question: string; answer: string }[];
+  shellOverride?: ShellOverride;
 }
 
-export default function FaqSection({ title, items }: FaqSectionProps) {
+export default function FaqSection({ title, items, shellOverride }: FaqSectionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   function toggle(i: number) {
@@ -22,7 +23,7 @@ export default function FaqSection({ title, items }: FaqSectionProps) {
   }
 
   return (
-    <SectionShell background="surface">
+    <SectionShell background="surface" override={shellOverride}>
       <Container narrow>
         <SectionHeading title={title} />
         <div className="space-y-3">

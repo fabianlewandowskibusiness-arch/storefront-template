@@ -1,16 +1,17 @@
 import Container from "@/components/layout/Container";
-import SectionShell from "@/components/layout/SectionShell";
+import SectionShell, { type ShellOverride } from "@/components/layout/SectionShell";
 import SectionHeading from "@/components/ui/SectionHeading";
 
 interface ProblemSectionProps {
   title: string;
   description: string;
   painPoints: string[];
+  shellOverride?: ShellOverride;
 }
 
-export default function ProblemSection({ title, description, painPoints }: ProblemSectionProps) {
+export default function ProblemSection({ title, description, painPoints, shellOverride }: ProblemSectionProps) {
   return (
-    <SectionShell background="surface">
+    <SectionShell background="surface" override={shellOverride}>
       <Container narrow>
         <SectionHeading title={title} />
         <p className="text-center text-[var(--color-text-muted)] text-base md:text-lg leading-relaxed mb-10">

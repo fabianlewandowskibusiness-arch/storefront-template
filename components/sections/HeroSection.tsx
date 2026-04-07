@@ -1,6 +1,37 @@
+import { cn } from "@/lib/utils/cn";
 import Container from "@/components/layout/Container";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
+import { type ShellOverride, DARK_MODE_STYLE } from "@/components/layout/SectionShell";
+
+// ── Background and padding maps — mirrors SectionShell but uses Hero defaults ──
+//
+// Hero's default spacing (py-12 md:py-20 lg:py-28) is intentionally larger than
+// generic SectionShell defaults. The `lg` preset preserves this existing value
+// so removing an override always restores the Hero to its original proportions.
+
+const HERO_BG_MAP: Record<string, string> = {
+  default: "bg-[var(--color-background)]",
+  light:   "bg-[var(--color-surface)]",
+  dark:    "bg-[var(--color-primary)]",
+  accent:  "bg-[var(--color-accent-soft)]",
+};
+
+const HERO_PT_MAP: Record<string, string> = {
+  none: "pt-0",
+  sm:   "pt-6 md:pt-10",
+  md:   "pt-10 md:pt-16",
+  lg:   "pt-12 md:pt-20 lg:pt-28",  // matches original py-12 md:py-20 lg:py-28
+};
+
+const HERO_PB_MAP: Record<string, string> = {
+  none: "pb-0",
+  sm:   "pb-6 md:pb-10",
+  md:   "pb-10 md:pb-16",
+  lg:   "pb-12 md:pb-20 lg:pb-28",
+};
+
+// ── Props ──────────────────────────────────────────────────────────────────────
 
 interface HeroSectionProps {
   eyebrow: string;
@@ -12,10 +43,20 @@ interface HeroSectionProps {
   secondaryCtaHref?: string;
   image: string;
   imageAlt: string;
-  heroVariant: string;
+  /**
+   * Layout variant — controlled by _sectionVariant (legacy heroVariant fallback).
+   *   "split-image"         — content left, image right (default)
+   *   "centered"            — text centred, image below
+   *   "split-image-reverse" — image left, content right
+   */
+  sectionVariant: string;
   bullets: string[];
   badges: string[];
+  /** Phase-2 style override from section.settings._* keys. */
+  shellOverride?: ShellOverride;
 }
+
+// ── Component ──────────────────────────────────────────────────────────────────
 
 export default function HeroSection({
   eyebrow,
@@ -27,23 +68,47 @@ export default function HeroSection({
   secondaryCtaHref,
   image,
   imageAlt,
-  heroVariant,
+  sectionVariant,
   bullets,
   badges,
+  shellOverride,
 }: HeroSectionProps) {
-  const isSplit = heroVariant === "split-image";
+  const isSplit    = sectionVariant === "split-image" || sectionVariant === "split-image-reverse";
+  const isReverse  = sectionVariant === "split-image-reverse";
+  const isCentered = !isSplit;
+
+  // ── Background ──
+  const bgClass = shellOverride?.backgroundStyle
+    ? HERO_BG_MAP[shellOverride.backgroundStyle] ?? HERO_BG_MAP.default
+    : "bg-[var(--color-background)]";
+
+  // ── Padding ──
+  const hasPaddingOverride = shellOverride?.paddingTop || shellOverride?.paddingBottom;
+  const paddingClass = hasPaddingOverride
+    ? cn(
+        HERO_PT_MAP[shellOverride!.paddingTop   ?? "lg"] ?? HERO_PT_MAP.lg,
+        HERO_PB_MAP[shellOverride!.paddingBottom ?? "lg"] ?? HERO_PB_MAP.lg,
+      )
+    : "section-py-default";
+
+  // ── Dark mode: cascade CSS variable overrides to all children ──
+  const darkStyle = shellOverride?.backgroundStyle === "dark" ? DARK_MODE_STYLE : undefined;
 
   return (
-    <section className="bg-[var(--color-background)] py-12 md:py-20 lg:py-28 overflow-hidden">
+    <section
+      className={cn(bgClass, paddingClass, "overflow-hidden")}
+      style={darkStyle}
+    >
       <Container>
         <div
-          className={
+          className={cn(
             isSplit
               ? "grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center"
-              : "text-center max-w-3xl mx-auto"
-          }
+              : "text-center max-w-3xl mx-auto",
+          )}
         >
-          <div className={isSplit ? "" : "mb-10"}>
+          {/* ── Content column ── */}
+          <div className={cn(isCentered && "mb-10", isReverse && "lg:order-2")}>
             {eyebrow && (
               <Badge variant="accent" className="mb-4">
                 {eyebrow}
@@ -95,7 +160,8 @@ export default function HeroSection({
             )}
           </div>
 
-          <div className={isSplit ? "relative" : "mx-auto max-w-md"}>
+          {/* ── Image column ── */}
+          <div className={cn(isSplit ? "relative" : "mx-auto max-w-md", isReverse && "lg:order-1")}>
             <div className="relative aspect-square rounded-[var(--radius)] overflow-hidden bg-[var(--color-surface)] shadow-[var(--shadow)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img

@@ -1,18 +1,19 @@
 import Container from "@/components/layout/Container";
-import SectionShell from "@/components/layout/SectionShell";
+import SectionShell, { type ShellOverride } from "@/components/layout/SectionShell";
 import SectionHeading from "@/components/ui/SectionHeading";
 
 interface ComparisonSectionProps {
   title: string;
   brandName: string;
   rows: { label: string; ours: string; other: string }[];
+  shellOverride?: ShellOverride;
 }
 
-export default function ComparisonSection({ title, brandName, rows }: ComparisonSectionProps) {
+export default function ComparisonSection({ title, brandName, rows, shellOverride }: ComparisonSectionProps) {
   if (rows.length === 0) return null;
 
   return (
-    <SectionShell background="surface">
+    <SectionShell background="surface" override={shellOverride}>
       <Container>
         <SectionHeading title={title} />
         <div className="overflow-x-auto">

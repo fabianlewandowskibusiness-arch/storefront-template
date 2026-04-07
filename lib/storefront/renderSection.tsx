@@ -1,4 +1,5 @@
 import type { StorefrontSection, StorefrontBlock, BrandingConfig, CommerceConfig } from "@/types/storefront";
+import type { ShellOverride } from "@/components/layout/SectionShell";
 import AnnouncementBar from "@/components/sections/AnnouncementBar";
 import HeroSection from "@/components/sections/HeroSection";
 import TrustBarSection from "@/components/sections/TrustBarSection";
@@ -18,6 +19,8 @@ interface RenderContext {
   checkoutUrl: string;
 }
 
+// ── Settings helpers ───────────────────────────────────────────────────────────
+
 function s(settings: Record<string, unknown>, key: string): string {
   return (settings[key] as string) ?? "";
 }
@@ -30,8 +33,31 @@ function blockSettings(blocks: StorefrontBlock[]): Record<string, unknown>[] {
   return blocks.map((b) => b.settings);
 }
 
+// ── Phase-2: meta key extraction ───────────────────────────────────────────────
+
+/**
+ * Builds a ShellOverride from a section's settings.
+ * Returns undefined when no override keys are present (preserves section defaults).
+ */
+function extractShellOverride(settings: Record<string, unknown>): ShellOverride | undefined {
+  const bg  = settings["_backgroundStyle"] as ShellOverride["backgroundStyle"] | undefined;
+  const pt  = settings["_paddingTop"]      as ShellOverride["paddingTop"]      | undefined;
+  const pb  = settings["_paddingBottom"]   as ShellOverride["paddingBottom"]   | undefined;
+  if (!bg && !pt && !pb) return undefined;
+  return { backgroundStyle: bg, paddingTop: pt, paddingBottom: pb };
+}
+
+// ── Main renderer ──────────────────────────────────────────────────────────────
+
 export function renderSection(section: StorefrontSection, ctx: RenderContext) {
   const { settings, blocks } = section;
+
+  // ── Visibility: skip hidden sections entirely (not CSS display:none) ──
+  if (settings["_visible"] === false) return null;
+
+  // ── Style meta — extracted once, passed to section components ──
+  const shellOverride   = extractShellOverride(settings);
+  const sectionVariant  = (settings["_sectionVariant"] as string) || "";
 
   switch (section.type) {
     case "ANNOUNCEMENT_BAR":
@@ -55,7 +81,9 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
           secondaryCtaHref={s(settings, "secondaryCtaHref")}
           image={s(settings, "image")}
           imageAlt={ctx.branding.productName}
-          heroVariant={s(settings, "heroVariant") || "split-image"}
+          // _sectionVariant takes precedence; legacy heroVariant key kept as fallback
+          sectionVariant={sectionVariant || s(settings, "heroVariant") || "split-image"}
+          shellOverride={shellOverride}
           bullets={blocks.filter((b) => b.type === "benefit_bullet").map((b) => s(b.settings, "text"))}
           badges={blocks.filter((b) => b.type === "badge").map((b) => s(b.settings, "text"))}
         />
@@ -74,6 +102,8 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
         <BenefitsSection
           key={section.id}
           title={s(settings, "title")}
+          sectionVariant={sectionVariant}
+          shellOverride={shellOverride}
           items={blockSettings(blocks) as { title: string; description: string }[]}
         />
       );
@@ -84,6 +114,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
           key={section.id}
           title={s(settings, "title")}
           description={s(settings, "description")}
+          shellOverride={shellOverride}
           painPoints={blocks.map((b) => s(b.settings, "text"))}
         />
       );
@@ -93,6 +124,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
         <FeaturesSection
           key={section.id}
           title={s(settings, "title")}
+          shellOverride={shellOverride}
           items={blockSettings(blocks) as { name: string; description: string }[]}
         />
       );
@@ -103,6 +135,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
           key={section.id}
           title={s(settings, "title")}
           brandName={ctx.branding.productName}
+          shellOverride={shellOverride}
           rows={blockSettings(blocks) as { label: string; ours: string; other: string }[]}
         />
       );
@@ -112,6 +145,8 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
         <TestimonialsSection
           key={section.id}
           title={s(settings, "title")}
+          sectionVariant={sectionVariant}
+          shellOverride={shellOverride}
           items={blockSettings(blocks) as { name: string; quote: string; avatar?: string }[]}
         />
       );
@@ -129,6 +164,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
           checkoutUrl={ctx.checkoutUrl}
           anchorId={s(settings, "anchorId") || "offer"}
           guaranteeText={s(settings, "guaranteeText")}
+          shellOverride={shellOverride}
           included={blocks.filter((b) => b.type === "included_item").map((b) => s(b.settings, "text"))}
         />
       );
@@ -138,6 +174,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
         <FaqSection
           key={section.id}
           title={s(settings, "title")}
+          shellOverride={shellOverride}
           items={blockSettings(blocks) as { question: string; answer: string }[]}
         />
       );
@@ -150,6 +187,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
           subheadline={s(settings, "subheadline")}
           buttonLabel={s(settings, "buttonLabel") || ctx.commerce.ctaButtonLabel}
           checkoutUrl={ctx.checkoutUrl}
+          shellOverride={shellOverride}
         />
       );
 
@@ -158,6 +196,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
         <FooterSection
           key={section.id}
           storeName={ctx.branding.storeName}
+          logoUrl={ctx.branding.logoUrl || undefined}
           contactEmail={s(settings, "contactEmail")}
           links={blocks.filter((b) => b.type === "link").map((b) => ({
             label: s(b.settings, "label"),

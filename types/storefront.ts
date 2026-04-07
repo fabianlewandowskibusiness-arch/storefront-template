@@ -54,6 +54,7 @@ export interface ThemeConfig {
   radius: string;
   shadow: string;
   spacing: string;
+  fontPreset: string;
 }
 
 export interface BrandingConfig {
@@ -61,6 +62,8 @@ export interface BrandingConfig {
   productName: string;
   tagline: string;
   language: string;
+  logoUrl: string;
+  faviconUrl: string;
 }
 
 export interface CommerceConfig {

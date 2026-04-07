@@ -1,7 +1,7 @@
 "use client";
 
 import Container from "@/components/layout/Container";
-import SectionShell from "@/components/layout/SectionShell";
+import SectionShell, { type ShellOverride } from "@/components/layout/SectionShell";
 import Button from "@/components/ui/Button";
 import { formatPrice } from "@/lib/utils/formatPrice";
 import { trackOfferCtaClick, trackBeginCheckout } from "@/lib/analytics/tracking";
@@ -17,6 +17,7 @@ interface OfferSectionProps {
   anchorId: string;
   guaranteeText: string;
   included: string[];
+  shellOverride?: ShellOverride;
 }
 
 export default function OfferSection({
@@ -30,6 +31,7 @@ export default function OfferSection({
   anchorId,
   guaranteeText,
   included,
+  shellOverride,
 }: OfferSectionProps) {
   const hasDiscount = compareAtPrice && compareAtPrice > price;
 
@@ -39,9 +41,9 @@ export default function OfferSection({
   }
 
   return (
-    <SectionShell id={anchorId} background="accent-soft">
+    <SectionShell id={anchorId} background="accent-soft" override={shellOverride}>
       <Container narrow>
-        <div className="bg-[var(--color-background)] rounded-[var(--radius)] shadow-lg border border-[var(--color-border)] p-8 md:p-12 text-center">
+        <div className="bg-[var(--color-background)] rounded-[var(--radius)] shadow-[var(--shadow)] border border-[var(--color-border)] p-8 md:p-12 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-[var(--color-text)] mb-4">
             {title}
           </h2>

@@ -14,6 +14,7 @@ const themeSchema = z.object({
   radius: z.string().default("xl"),
   shadow: z.string().default("soft"),
   spacing: z.string().default("comfortable"),
+  fontPreset: z.string().default("modern"),
 });
 
 const brandingSchema = z.object({
@@ -21,6 +22,8 @@ const brandingSchema = z.object({
   productName: z.string(),
   tagline: z.string().default(""),
   language: z.string().default("pl"),
+  logoUrl: z.string().default(""),
+  faviconUrl: z.string().default(""),
 });
 
 const blockSchema = z.object({

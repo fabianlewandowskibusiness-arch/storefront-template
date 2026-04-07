@@ -4,9 +4,10 @@ interface FooterSectionProps {
   storeName: string;
   contactEmail: string;
   links: { label: string; href: string }[];
+  logoUrl?: string;
 }
 
-export default function FooterSection({ storeName, contactEmail, links }: FooterSectionProps) {
+export default function FooterSection({ storeName, contactEmail, links, logoUrl }: FooterSectionProps) {
   const year = new Date().getFullYear();
 
   return (
@@ -14,7 +15,16 @@ export default function FooterSection({ storeName, contactEmail, links }: Footer
       <Container>
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-center md:text-left">
-            <p className="font-semibold text-white text-sm">{storeName}</p>
+            {logoUrl ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={logoUrl}
+                alt={storeName}
+                className="h-8 w-auto object-contain mb-1 mx-auto md:mx-0"
+              />
+            ) : (
+              <p className="font-semibold text-white text-sm">{storeName}</p>
+            )}
             <p className="text-xs mt-1">&copy; {year} {storeName}. Wszelkie prawa zastrzeżone.</p>
           </div>
 

@@ -1,15 +1,16 @@
 import Container from "@/components/layout/Container";
-import SectionShell from "@/components/layout/SectionShell";
+import SectionShell, { type ShellOverride } from "@/components/layout/SectionShell";
 import SectionHeading from "@/components/ui/SectionHeading";
 
 interface FeaturesSectionProps {
   title: string;
   items: { name: string; description: string }[];
+  shellOverride?: ShellOverride;
 }
 
-export default function FeaturesSection({ title, items }: FeaturesSectionProps) {
+export default function FeaturesSection({ title, items, shellOverride }: FeaturesSectionProps) {
   return (
-    <SectionShell>
+    <SectionShell override={shellOverride}>
       <Container>
         <SectionHeading title={title} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

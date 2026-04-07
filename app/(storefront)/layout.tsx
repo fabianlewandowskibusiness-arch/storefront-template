@@ -7,6 +7,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${config.branding.productName} | ${config.branding.storeName}`,
     description: config.branding.tagline,
+    ...(config.branding.faviconUrl
+      ? { icons: { icon: config.branding.faviconUrl } }
+      : {}),
   };
 }
 

@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { storefrontConfigSchema } from "../schema";
 import type { StorefrontConfig } from "@/types/storefront";
@@ -17,14 +18,21 @@ export async function loadRemoteConfig(): Promise<StorefrontConfig> {
     throw new Error("STORE_ID is required for remote config loading");
   }
 
-  const url = `${apiUrl}/storefront-runtime/${storeId}`;
+  // Draft mode is signalled by the middleware via x-storefront-mode: draft.
+  // In draft mode we bypass the CDN cache and fetch the latest saved version.
+  const requestHeaders = await headers();
+  const isDraft = requestHeaders.get("x-storefront-mode") === "draft";
+
+  const url = isDraft
+    ? `${apiUrl}/storefront-runtime/${storeId}?mode=draft`
+    : `${apiUrl}/storefront-runtime/${storeId}`;
 
   let response: Response;
   try {
-    response = await fetch(url, {
-      next: { revalidate: REVALIDATE_SECONDS },
-      headers: { Accept: "application/json" },
-    });
+    response = await fetch(url, isDraft
+      ? { cache: "no-store", headers: { Accept: "application/json" } }
+      : { next: { revalidate: REVALIDATE_SECONDS }, headers: { Accept: "application/json" } },
+    );
   } catch (error) {
     log(storeId, "Network error fetching config:", error);
     redirect("/store-unavailable");
