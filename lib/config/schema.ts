@@ -77,10 +77,23 @@ const analyticsSchema = z.object({
   enabled: z.boolean().default(true),
 });
 
+// SEO block — all fields optional so pre-SEO storefront configs remain valid.
+// The backend may send any subset; the metadata layer applies sensible fallbacks.
+const seoSchema = z.object({
+  title:          z.string().optional(),
+  description:    z.string().optional(),
+  ogTitle:        z.string().optional(),
+  ogDescription:  z.string().optional(),
+  ogImage:        z.string().nullable().optional(),
+  noIndex:        z.boolean().optional(),
+});
+
 export const storefrontConfigSchema = z.object({
   theme: themeSchema,
   branding: brandingSchema,
   pages: z.array(pageSchema).min(1),
   commerce: commerceSchema,
   analytics: analyticsSchema.default({ provider: "custom", enabled: true }),
+  // Optional — absent in older configs, present in newly-generated ones.
+  seo: seoSchema.optional(),
 });

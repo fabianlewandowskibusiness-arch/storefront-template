@@ -80,3 +80,12 @@ export interface AnalyticsConfig {
   provider: string;
   enabled: boolean;
 }
+
+export interface SeoConfig {
+  title?: string;
+  description?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string | null;
+  noIndex?: boolean;
+}
