@@ -29,7 +29,7 @@ const brandingSchema = z.object({
 const blockSchema = z.object({
   id: z.string(),
   type: z.string(),
-  settings: z.record(z.string(), z.unknown()).default({}),
+  settings: z.record(z.string(), z.unknown()).nullable().default({}),
 });
 
 const sectionSchema = z.object({
@@ -49,7 +49,7 @@ const sectionSchema = z.object({
     "FOOTER",
   ]),
   position: z.number(),
-  settings: z.record(z.string(), z.unknown()).default({}),
+  settings: z.record(z.string(), z.unknown()).nullable().default({}),
   blocks: z.array(blockSchema).default([]),
 });
 
@@ -64,12 +64,12 @@ const pageSchema = z.object({
 
 const commerceSchema = z.object({
   provider: z.string().default("woocommerce"),
-  storeUrl: z.string(),
+  storeUrl: z.string().nullable().default(""),
   productUrl: z.string().default(""),
-  productId: z.string(),
+  productId: z.string().nullable().default(""),
   variationId: z.string().nullable().optional(),
-  checkoutMode: z.string().default("ADD_TO_CART_REDIRECT"),
-  ctaButtonLabel: z.string().default("Kup teraz"),
+  checkoutMode: z.string().nullable().default("ADD_TO_CART_REDIRECT"),
+  ctaButtonLabel: z.string().nullable().default("Kup teraz"),
 });
 
 const analyticsSchema = z.object({
@@ -92,7 +92,7 @@ export const storefrontConfigSchema = z.object({
   theme: themeSchema,
   branding: brandingSchema,
   pages: z.array(pageSchema).min(1),
-  commerce: commerceSchema,
+  commerce: commerceSchema.nullable().optional(),
   analytics: analyticsSchema.default({ provider: "custom", enabled: true }),
   // Optional — absent in older configs, present in newly-generated ones.
   seo: seoSchema.nullable().optional(),

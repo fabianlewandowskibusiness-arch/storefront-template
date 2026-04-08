@@ -2,7 +2,8 @@ import type { CommerceConfig } from "@/types/storefront";
 import type { CommerceProvider } from "./types";
 import { createWooCommerceProvider } from "./woocommerce";
 
-export function createCommerceProvider(commerce: CommerceConfig): CommerceProvider | null {
+export function createCommerceProvider(commerce: CommerceConfig | null | undefined): CommerceProvider | null {
+  if (!commerce) return null;
   if (commerce.provider === "woocommerce") {
     return createWooCommerceProvider({
       storeUrl: commerce.storeUrl,

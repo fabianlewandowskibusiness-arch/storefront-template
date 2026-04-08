@@ -15,22 +15,22 @@ import FooterSection from "@/components/sections/FooterSection";
 
 interface RenderContext {
   branding: BrandingConfig;
-  commerce: CommerceConfig;
+  commerce: CommerceConfig | null | undefined;
   checkoutUrl: string;
 }
 
 // ── Settings helpers ───────────────────────────────────────────────────────────
 
-function s(settings: Record<string, unknown>, key: string): string {
-  return (settings[key] as string) ?? "";
+function s(settings: Record<string, unknown> | null | undefined, key: string): string {
+  return ((settings?.[key]) as string) ?? "";
 }
 
-function sNum(settings: Record<string, unknown>, key: string): number {
-  return (settings[key] as number) ?? 0;
+function sNum(settings: Record<string, unknown> | null | undefined, key: string): number {
+  return ((settings?.[key]) as number) ?? 0;
 }
 
 function blockSettings(blocks: StorefrontBlock[]): Record<string, unknown>[] {
-  return blocks.map((b) => b.settings);
+  return blocks.map((b) => b.settings ?? {});
 }
 
 // ── Phase-2: meta key extraction ───────────────────────────────────────────────
@@ -39,7 +39,8 @@ function blockSettings(blocks: StorefrontBlock[]): Record<string, unknown>[] {
  * Builds a ShellOverride from a section's settings.
  * Returns undefined when no override keys are present (preserves section defaults).
  */
-function extractShellOverride(settings: Record<string, unknown>): ShellOverride | undefined {
+function extractShellOverride(settings: Record<string, unknown> | null | undefined): ShellOverride | undefined {
+  if (!settings) return undefined;
   const bg  = settings["_backgroundStyle"] as ShellOverride["backgroundStyle"] | undefined;
   const pt  = settings["_paddingTop"]      as ShellOverride["paddingTop"]      | undefined;
   const pb  = settings["_paddingBottom"]   as ShellOverride["paddingBottom"]   | undefined;
@@ -53,11 +54,11 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
   const { settings, blocks } = section;
 
   // ── Visibility: skip hidden sections entirely (not CSS display:none) ──
-  if (settings["_visible"] === false) return null;
+  if (settings?.["_visible"] === false) return null;
 
   // ── Style meta — extracted once, passed to section components ──
   const shellOverride   = extractShellOverride(settings);
-  const sectionVariant  = (settings["_sectionVariant"] as string) || "";
+  const sectionVariant  = ((settings?.["_sectionVariant"]) as string) || "";
 
   switch (section.type) {
     case "ANNOUNCEMENT_BAR":
@@ -160,7 +161,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
           price={sNum(settings, "price")}
           compareAtPrice={sNum(settings, "compareAtPrice") || undefined}
           currency={s(settings, "currency") || "PLN"}
-          ctaLabel={s(settings, "ctaLabel") || ctx.commerce.ctaButtonLabel}
+          ctaLabel={s(settings, "ctaLabel") || ctx.commerce?.ctaButtonLabel || ""}
           checkoutUrl={ctx.checkoutUrl}
           anchorId={s(settings, "anchorId") || "offer"}
           guaranteeText={s(settings, "guaranteeText")}
@@ -185,7 +186,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
           key={section.id}
           headline={s(settings, "headline")}
           subheadline={s(settings, "subheadline")}
-          buttonLabel={s(settings, "buttonLabel") || ctx.commerce.ctaButtonLabel}
+          buttonLabel={s(settings, "buttonLabel") || ctx.commerce?.ctaButtonLabel || ""}
           checkoutUrl={ctx.checkoutUrl}
           shellOverride={shellOverride}
         />

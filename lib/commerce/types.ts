@@ -4,9 +4,9 @@ export interface CommerceProvider {
 }
 
 export interface WooCommerceConfig {
-  storeUrl: string;
-  productId: string;
+  storeUrl: string | null;
+  productId: string | null;
   variationId?: string | null;
   productUrl?: string;
-  checkoutMode: string;
+  checkoutMode: string | null;
 }

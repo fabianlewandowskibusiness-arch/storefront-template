@@ -22,14 +22,14 @@ export type SectionType =
 export interface StorefrontBlock {
   id: string;
   type: string;
-  settings: Record<string, unknown>;
+  settings: Record<string, unknown> | null;
 }
 
 export interface StorefrontSection {
   id: string;
   type: SectionType;
   position: number;
-  settings: Record<string, unknown>;
+  settings: Record<string, unknown> | null;
   blocks: StorefrontBlock[];
 }
 
@@ -68,12 +68,12 @@ export interface BrandingConfig {
 
 export interface CommerceConfig {
   provider: string;
-  storeUrl: string;
+  storeUrl: string | null;
   productUrl: string;
-  productId: string;
+  productId: string | null;
   variationId?: string | null;
-  checkoutMode: string;
-  ctaButtonLabel: string;
+  checkoutMode: string | null;
+  ctaButtonLabel: string | null;
 }
 
 export interface AnalyticsConfig {
