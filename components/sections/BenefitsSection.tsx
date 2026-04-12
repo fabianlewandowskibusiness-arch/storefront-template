@@ -3,6 +3,7 @@ import Container from "@/components/layout/Container";
 import SectionShell, { type ShellOverride } from "@/components/layout/SectionShell";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Card from "@/components/ui/Card";
+import Reveal from "@/components/storefront/Reveal";
 
 interface BenefitsSectionProps {
   title: string;
@@ -46,17 +47,19 @@ export default function BenefitsSection({
         <SectionHeading title={title} />
         <div className={gridClass}>
           {items.map((item, i) => (
-            <Card key={i} hover>
-              <div className="text-[var(--color-accent)] mb-4">
-                {BENEFIT_ICONS[i % BENEFIT_ICONS.length]}
-              </div>
-              <h3 className="text-lg font-semibold text-[var(--color-text)] mb-2">
-                {item.title}
-              </h3>
-              <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
-                {item.description}
-              </p>
-            </Card>
+            <Reveal key={i} index={i}>
+              <Card hover>
+                <div className="text-[var(--color-accent)] mb-4">
+                  {BENEFIT_ICONS[i % BENEFIT_ICONS.length]}
+                </div>
+                <h3 className="text-lg font-semibold text-[var(--color-text)] mb-2">
+                  {item.title}
+                </h3>
+                <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
+                  {item.description}
+                </p>
+              </Card>
+            </Reveal>
           ))}
         </div>
       </Container>

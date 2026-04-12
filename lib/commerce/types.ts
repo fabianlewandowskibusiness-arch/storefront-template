@@ -8,5 +8,38 @@ export interface WooCommerceConfig {
   productId: string | null;
   variationId?: string | null;
   productUrl?: string;
-  checkoutMode: string | null;
+  // checkoutMode is always a string after schema .catch() coercion.
+  checkoutMode: string;
+}
+
+// ── Cart handoff bridge types ─────────────────────────────────────────────────
+
+/** Where to land on WooCommerce after handoff. Mirrors the backend enum. */
+export type CartHandoffTarget = "CART" | "CHECKOUT";
+
+/** A single line in a cart handoff POST body. */
+export interface CartHandoffLine {
+  /** Client-side product identifier from the Zustand cart (optional). */
+  productId?: string;
+  /** Client-side variation identifier (optional). */
+  variationId?: string;
+  /** Quantity for this line. Must be ≥ 1. */
+  quantity: number;
+}
+
+/** POST body sent to {@code /api/storefront-runtime/{storeId}/commerce/handoff}. */
+export interface CartHandoffRequest {
+  lines: CartHandoffLine[];
+  /** Optional target hint. Backend derives a default from checkoutMode when null. */
+  target?: CartHandoffTarget;
+}
+
+/** Successful response from the cart handoff endpoint. */
+export interface CartHandoffResponse {
+  /** Fully-qualified WooCommerce URL to redirect the buyer to. */
+  redirectUrl: string;
+  /** Non-fatal informational warnings. */
+  warnings: string[];
+  /** Human-readable cart summary (for debugging). */
+  cartSummary: string;
 }

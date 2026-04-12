@@ -36,33 +36,40 @@ StorefrontConfig
 
 | Type | Component | Description |
 |---|---|---|
-| `ANNOUNCEMENT_BAR` | AnnouncementBar | Top banner with promo text |
-| `HERO` | HeroSection | Headline, CTA, product image, benefit bullets (blocks) |
-| `TRUST_BAR` | TrustBarSection | Trust indicators (blocks) |
-| `BENEFITS` | BenefitsSection | Benefit cards grid (blocks) |
-| `PROBLEM` | ProblemSection | Problem framing with pain points (blocks) |
-| `FEATURES` | FeaturesSection | Numbered feature list (blocks) |
-| `COMPARISON` | ComparisonSection | Us vs. them comparison table (blocks) |
-| `TESTIMONIALS` | TestimonialsSection | Customer review cards (blocks) |
-| `OFFER` | OfferSection | Pricing card with CTA, included items (blocks) |
-| `FAQ` | FaqSection | Accordion FAQ items (blocks) |
-| `CTA` | FinalCtaSection | Closing call-to-action section |
-| `FOOTER` | FooterSection | Footer links (blocks) and contact email |
+| `ANNOUNCEMENT` | AnnouncementBar | Scrolling ticker with typed `items[]` (text, icon, emphasis) |
+| `HERO` | HeroSection | Headline, `gallery[]`, `packages[]`, `socialProof`, `stickyBuyBar` |
+| `TRUST_BAR` | TrustBarSection | Trust indicator strings in `items[]` |
+| `BENEFITS` | BenefitsSection | Benefit cards in `items[]` (title, icon, description) |
+| `PROBLEM` | ProblemSection | Problem pain points in `items[]` (title, description) |
+| `FEATURES` | FeaturesSection | Feature list in `items[]` (name, description) |
+| `COMPARISON` | ComparisonSection | Comparison table `rows[]` (feature, productValue, competitorValue) |
+| `TESTIMONIALS` | TestimonialsSection | Review cards in `testimonials[]` (quoteShort/quoteLong, rich fields) |
+| `OFFER` | OfferSection | Pricing card with `price`, `compareAtPrice`, `included[]` |
+| `FAQ` | FaqSection | Accordion items in `items[]` (question, answer) |
+| `CTA` | FinalCtaSection | Closing CTA with `headline`, `trustItems[]` |
+| `FOOTER` | FooterSection | `contactEmail`, `links[]` (label, href) |
+| `UGC` | UgcSection | Photo/video carousel in `items[]` (imageUrl/videoUrl, caption, rating) |
+| `EXPERT` | ExpertSection | Expert endorsement (expertName, expertRole, expertImage, videoUrl) |
+| `STORY` | StorySection | Brand story with `paragraphs[]` (heading, body) |
+| `RISK_REVERSAL` | RiskReversalSection | Guarantee section with `steps[]` |
 
-### How Sections Use Blocks
+### How Sections Store Content
 
-Sections have `settings` for section-level data (title, description) and `blocks[]` for repeatable items:
+All section content is in `settings`. The `blocks[]` array exists in the API contract for forward compatibility but the renderer reads exclusively from `settings`. Arrays of items are stored directly in `settings` as typed arrays:
 
 ```json
 {
   "id": "faq-1",
   "type": "FAQ",
   "position": 9,
-  "settings": { "title": "Frequently Asked Questions" },
-  "blocks": [
-    { "id": "q1", "type": "faq_item", "settings": { "question": "...", "answer": "..." } },
-    { "id": "q2", "type": "faq_item", "settings": { "question": "...", "answer": "..." } }
-  ]
+  "settings": {
+    "title": "Frequently Asked Questions",
+    "items": [
+      { "question": "Jak stosować?", "answer": "Jedną kapsułkę wieczorem..." },
+      { "question": "Czy są efekty uboczne?", "answer": "Produkt jest naturalny..." }
+    ]
+  },
+  "blocks": []
 }
 ```
 

@@ -1,4 +1,5 @@
 import { storefrontConfigSchema } from "../schema";
+import { normalizeMediaUrls } from "../normalizeMediaUrls";
 import type { StorefrontConfig } from "@/types/storefront";
 
 export async function loadLocalConfig(): Promise<StorefrontConfig> {
@@ -13,5 +14,6 @@ export async function loadLocalConfig(): Promise<StorefrontConfig> {
     throw new Error(`Invalid local storefront config:\n${formatted}`);
   }
 
-  return result.data;
+  // Defensive compatibility layer — see normalizeMediaUrls.ts header comment.
+  return normalizeMediaUrls(result.data);
 }

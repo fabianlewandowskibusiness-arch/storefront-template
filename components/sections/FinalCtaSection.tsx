@@ -7,9 +7,10 @@ import { trackFinalCtaClick, trackBeginCheckout } from "@/lib/analytics/tracking
 
 interface FinalCtaSectionProps {
   headline: string;
-  subheadline: string;
+  subheadline?: string;
   buttonLabel: string;
   checkoutUrl: string;
+  trustItems?: string[];
   shellOverride?: ShellOverride;
 }
 
@@ -18,43 +19,33 @@ export default function FinalCtaSection({
   subheadline,
   buttonLabel,
   checkoutUrl,
+  trustItems = [],
   shellOverride,
 }: FinalCtaSectionProps) {
+  const hasBackgroundOverride =
+    !!shellOverride?.backgroundStyle && shellOverride.backgroundStyle !== "default";
+
+  // The default look is a strong gradient with white type. Editor overrides
+  // can replace it with a flat background; in that case we strip the gradient
+  // class and let SectionShell drive the background + text colour.
+  const sectionClassName = hasBackgroundOverride
+    ? undefined
+    : "bg-gradient-to-br from-[var(--color-primary)] via-[var(--color-primary)] to-[var(--color-accent)] text-white";
+
+  const buttonClassName = hasBackgroundOverride
+    ? "min-w-[280px] text-lg py-4"
+    : "bg-white !text-[var(--color-primary)] hover:bg-gray-100 min-w-[280px] text-lg py-4";
+
   function handleClick() {
     trackFinalCtaClick(buttonLabel);
     trackBeginCheckout();
   }
 
-  // When a real background override is active ('light', 'dark', 'accent'),
-  // suppress the gradient className so SectionShell's override background wins.
-  // The gradient is only the section's own default — it should not resist an
-  // explicit editor override.
-  //
-  // 'default' and undefined are both treated as "no override" — gradient applies.
-  const hasBackgroundOverride =
-    !!shellOverride?.backgroundStyle && shellOverride.backgroundStyle !== "default";
-
-  // When gradient is active, explicit white text is needed (text-white).
-  // When an override background is active, text colour comes from CSS variables:
-  //   - dark  → --color-text overridden to #f1f5f9 by SectionShell's DARK_MODE_STYLE
-  //   - light / accent → --color-text stays #111827 (default dark, readable)
-  // No explicit text class needed in either override case.
-  const sectionClassName = hasBackgroundOverride
-    ? undefined
-    : "bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] text-white";
-
-  // The CTA button uses white background with primary-coloured text.
-  // This reads well against the gradient and remains acceptable against dark/accent
-  // backgrounds. For light override it is less ideal but still functional.
-  const buttonClassName = hasBackgroundOverride
-    ? "min-w-[260px] text-lg"
-    : "bg-white !text-[var(--color-primary)] hover:bg-gray-100 min-w-[260px] text-lg";
-
   return (
     <SectionShell className={sectionClassName} override={shellOverride}>
       <Container narrow>
         <div className="text-center">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 leading-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-4 leading-tight">
             {headline}
           </h2>
           {subheadline && (
@@ -62,6 +53,7 @@ export default function FinalCtaSection({
               {subheadline}
             </p>
           )}
+
           <Button
             variant="primary"
             size="lg"
@@ -71,6 +63,28 @@ export default function FinalCtaSection({
           >
             {buttonLabel}
           </Button>
+
+          {/* Trust signals strip under the CTA */}
+          {trustItems.length > 0 && (
+            <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm opacity-90">
+              {trustItems.map((t, i) => (
+                <span key={i} className="flex items-center gap-1.5">
+                  <svg
+                    className="w-4 h-4"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </Container>
     </SectionShell>

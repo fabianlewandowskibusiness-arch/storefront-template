@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { storefrontConfigSchema } from "../schema";
+import { normalizeMediaUrls } from "../normalizeMediaUrls";
 import type { StorefrontConfig } from "@/types/storefront";
 
 const DEFAULT_API_URL = "https://api.ecommerce-flow.ai";
@@ -70,5 +71,6 @@ export async function loadRemoteConfig(): Promise<StorefrontConfig> {
     redirect("/config-error");
   }
 
-  return result.data;
+  // Defensive compatibility layer — see normalizeMediaUrls.ts header comment.
+  return normalizeMediaUrls(result.data);
 }

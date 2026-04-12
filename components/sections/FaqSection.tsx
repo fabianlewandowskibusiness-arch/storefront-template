@@ -4,6 +4,7 @@ import { useState } from "react";
 import Container from "@/components/layout/Container";
 import SectionShell, { type ShellOverride } from "@/components/layout/SectionShell";
 import SectionHeading from "@/components/ui/SectionHeading";
+import Reveal from "@/components/storefront/Reveal";
 import { trackFaqOpen } from "@/lib/analytics/tracking";
 
 interface FaqSectionProps {
@@ -28,8 +29,9 @@ export default function FaqSection({ title, items, shellOverride }: FaqSectionPr
         <SectionHeading title={title} />
         <div className="space-y-3">
           {items.map((item, i) => (
-            <div
+            <Reveal
               key={i}
+              index={i}
               className="bg-[var(--color-background)] border border-[var(--color-border)] rounded-[var(--radius)] overflow-hidden shadow-[var(--shadow)]"
             >
               <button
@@ -56,7 +58,7 @@ export default function FaqSection({ title, items, shellOverride }: FaqSectionPr
                   {item.answer}
                 </div>
               )}
-            </div>
+            </Reveal>
           ))}
         </div>
       </Container>

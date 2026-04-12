@@ -1,178 +1,295 @@
-import { cn } from "@/lib/utils/cn";
+"use client";
+
+import { useRef, useState, type MouseEvent } from "react";
 import Container from "@/components/layout/Container";
 import Button from "@/components/ui/Button";
-import Badge from "@/components/ui/Badge";
-import { type ShellOverride, DARK_MODE_STYLE } from "@/components/layout/SectionShell";
-
-// ── Background and padding maps — mirrors SectionShell but uses Hero defaults ──
-//
-// Hero's default spacing (py-12 md:py-20 lg:py-28) is intentionally larger than
-// generic SectionShell defaults. The `lg` preset preserves this existing value
-// so removing an override always restores the Hero to its original proportions.
-
-const HERO_BG_MAP: Record<string, string> = {
-  default: "bg-[var(--color-background)]",
-  light:   "bg-[var(--color-surface)]",
-  dark:    "bg-[var(--color-primary)]",
-  accent:  "bg-[var(--color-accent-soft)]",
-};
-
-const HERO_PT_MAP: Record<string, string> = {
-  none: "pt-0",
-  sm:   "pt-6 md:pt-10",
-  md:   "pt-10 md:pt-16",
-  lg:   "pt-12 md:pt-20 lg:pt-28",  // matches original py-12 md:py-20 lg:py-28
-};
-
-const HERO_PB_MAP: Record<string, string> = {
-  none: "pb-0",
-  sm:   "pb-6 md:pb-10",
-  md:   "pb-10 md:pb-16",
-  lg:   "pb-12 md:pb-20 lg:pb-28",
-};
-
-// ── Props ──────────────────────────────────────────────────────────────────────
+import ImageGallery from "@/components/storefront/ImageGallery";
+import PackageSelector from "@/components/storefront/PackageSelector";
+import StarRating from "@/components/storefront/StarRating";
+import SocialProofBadge from "@/components/storefront/SocialProofBadge";
+import MobileBuyBar from "@/components/storefront/MobileBuyBar";
+import { formatPrice } from "@/lib/utils/formatPrice";
+import { trackHeroCtaClick, trackBeginCheckout } from "@/lib/analytics/tracking";
+import { useUiStore } from "@/lib/stores/uiStore";
+import type { GalleryItem, HeroPackage } from "@/types/storefront";
 
 interface HeroSectionProps {
-  eyebrow: string;
   headline: string;
-  subheadline: string;
-  primaryCtaLabel: string;
-  primaryCtaHref: string;
-  secondaryCtaLabel?: string;
-  secondaryCtaHref?: string;
-  image: string;
-  imageAlt: string;
-  /**
-   * Layout variant — controlled by _sectionVariant (legacy heroVariant fallback).
-   *   "split-image"         — content left, image right (default)
-   *   "centered"            — text centred, image below
-   *   "split-image-reverse" — image left, content right
-   */
-  sectionVariant: string;
+  subheadline?: string;
+  description?: string;
+  rating?: number;
+  reviewCount?: number;
   bullets: string[];
-  badges: string[];
-  /** Phase-2 style override from section.settings._* keys. */
-  shellOverride?: ShellOverride;
+  trustBadge?: string;
+  riskReversal?: string;
+  deliveryInfo?: string;
+  paymentInfo?: string;
+  gallery: GalleryItem[];
+  packages: HeroPackage[];
+  fallbackCheckoutUrl: string;
+  fallbackCtaLabel: string;
+  currency: string;
+  productName: string;
 }
 
-// ── Component ──────────────────────────────────────────────────────────────────
-
 export default function HeroSection({
-  eyebrow,
   headline,
   subheadline,
-  primaryCtaLabel,
-  primaryCtaHref,
-  secondaryCtaLabel,
-  secondaryCtaHref,
-  image,
-  imageAlt,
-  sectionVariant,
+  description,
+  rating,
+  reviewCount,
   bullets,
-  badges,
-  shellOverride,
+  trustBadge,
+  riskReversal,
+  deliveryInfo,
+  paymentInfo,
+  gallery,
+  packages,
+  fallbackCheckoutUrl,
+  fallbackCtaLabel,
+  currency,
+  productName,
 }: HeroSectionProps) {
-  const isSplit    = sectionVariant === "split-image" || sectionVariant === "split-image-reverse";
-  const isReverse  = sectionVariant === "split-image-reverse";
-  const isCentered = !isSplit;
+  const sectionRef = useRef<HTMLElement>(null);
+  const addToCart = useUiStore((s) => s.addToCart);
+  const openCart = useUiStore((s) => s.openCart);
+  const showToast = useUiStore((s) => s.showToast);
 
-  // ── Background ──
-  const bgClass = shellOverride?.backgroundStyle
-    ? HERO_BG_MAP[shellOverride.backgroundStyle] ?? HERO_BG_MAP.default
-    : "bg-[var(--color-background)]";
+  // Default selection: bestseller package, otherwise the first one.
+  const initialId =
+    packages.find((p) => p.isBestseller)?.id ?? packages[0]?.id ?? "";
+  const [selectedId, setSelectedId] = useState(initialId);
+  const selectedPkg = packages.find((p) => p.id === selectedId);
 
-  // ── Padding ──
-  const hasPaddingOverride = shellOverride?.paddingTop || shellOverride?.paddingBottom;
-  const paddingClass = hasPaddingOverride
-    ? cn(
-        HERO_PT_MAP[shellOverride!.paddingTop   ?? "lg"] ?? HERO_PT_MAP.lg,
-        HERO_PB_MAP[shellOverride!.paddingBottom ?? "lg"] ?? HERO_PB_MAP.lg,
-      )
-    : "section-py-default";
+  // CTA resolution: per-package URL beats the global checkout URL.
+  // CTA label includes the live price of the selected package.
+  const ctaHref = selectedPkg?.ctaHref || fallbackCheckoutUrl;
+  const ctaLabel = selectedPkg
+    ? `${selectedPkg.ctaLabel || "Kup teraz"} — ${formatPrice(selectedPkg.price, currency)}`
+    : fallbackCtaLabel;
 
-  // ── Dark mode: cascade CSS variable overrides to all children ──
-  const darkStyle = shellOverride?.backgroundStyle === "dark" ? DARK_MODE_STYLE : undefined;
+  // Primary CTA click: add the selected package to the client-side cart,
+  // open the cart drawer, and fire a confirmation toast. Navigation to
+  // the external checkout URL is suppressed — the user continues to
+  // checkout from the cart drawer. This is the same pattern as Shopify.
+  function handleCtaClick(e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) {
+    trackHeroCtaClick(ctaLabel, ctaHref);
+    if (!selectedPkg) return;
+
+    e.preventDefault();
+    trackBeginCheckout(productName, selectedPkg.price, currency);
+
+    addToCart({
+      id: selectedPkg.id,
+      productId: selectedPkg.productId,
+      variantId: selectedPkg.variationId,
+      name: `${productName} · ${selectedPkg.label}`,
+      price: selectedPkg.price,
+      comparePrice: selectedPkg.comparePrice,
+      currency,
+      image: gallery[0]?.url,
+    });
+    showToast("Dodano do koszyka");
+    openCart();
+  }
 
   return (
-    <section
-      className={cn(bgClass, paddingClass, "overflow-hidden")}
-      style={darkStyle}
-    >
-      <Container>
-        <div
-          className={cn(
-            isSplit
-              ? "grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center"
-              : "text-center max-w-3xl mx-auto",
-          )}
-        >
-          {/* ── Content column ── */}
-          <div className={cn(isCentered && "mb-10", isReverse && "lg:order-2")}>
-            {eyebrow && (
-              <Badge variant="accent" className="mb-4">
-                {eyebrow}
-              </Badge>
-            )}
+    <>
+      <section
+        ref={sectionRef}
+        className="bg-[var(--color-background)] pt-6 md:pt-10 pb-10 md:pb-16"
+      >
+        <Container>
+          <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-8 lg:gap-12">
+            {/* ─── LEFT: gallery ─── */}
+            <div className="lg:sticky lg:top-6 lg:self-start">
+              <ImageGallery items={gallery} productName={productName} />
+            </div>
 
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-extrabold text-[var(--color-text)] leading-[1.1] tracking-tight">
-              {headline}
-            </h1>
+            {/* ─── RIGHT: buy box ─── */}
+            <div className="flex flex-col">
+              {/* Rating */}
+              {rating !== undefined && rating > 0 && (
+                <div className="mb-3">
+                  <StarRating
+                    rating={rating}
+                    reviewCount={reviewCount}
+                    animateCount
+                  />
+                </div>
+              )}
 
-            {subheadline && (
-              <p className="mt-5 text-base md:text-lg text-[var(--color-text-muted)] leading-relaxed max-w-lg">
-                {subheadline}
-              </p>
-            )}
+              {/* Headline */}
+              <h1 className="text-2xl md:text-3xl lg:text-[2.25rem] font-extrabold text-[var(--color-text)] leading-[1.15] tracking-tight">
+                {headline}
+              </h1>
 
-            {bullets.length > 0 && (
-              <ul className="mt-6 space-y-2.5">
-                {bullets.map((bullet, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-[var(--color-text)]">
-                    <svg className="w-5 h-5 mt-0.5 text-[var(--color-success)] shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-sm md:text-base">{bullet}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+              {/* Subheadline */}
+              {subheadline && (
+                <p className="mt-2 text-base md:text-lg font-medium text-[var(--color-text)]">
+                  {subheadline}
+                </p>
+              )}
 
-            <div className="mt-8 flex flex-col sm:flex-row gap-3">
-              <Button variant="primary" size="lg" href={primaryCtaHref}>
-                {primaryCtaLabel}
-              </Button>
-              {secondaryCtaLabel && (
-                <Button variant="secondary" size="lg" href={secondaryCtaHref}>
-                  {secondaryCtaLabel}
+              {/* Long description */}
+              {description && (
+                <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)] leading-relaxed">
+                  {description}
+                </p>
+              )}
+
+              {/* Effect-based bullets — short, dense */}
+              {bullets.length > 0 && (
+                <ul className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                  {bullets.map((b, i) => (
+                    <li
+                      key={i}
+                      className="flex items-center gap-2 text-sm font-medium text-[var(--color-text)]"
+                    >
+                      <svg
+                        className="w-4 h-4 text-[var(--color-success)] shrink-0"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {/* Trust badge (e.g. certification) */}
+              {trustBadge && (
+                <div className="mt-4 inline-flex self-start items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-accent-soft)] text-[var(--color-accent)] text-xs font-semibold">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {trustBadge}
+                </div>
+              )}
+
+              {/* Package selector */}
+              {packages.length > 0 && (
+                <div className="mt-6">
+                  <PackageSelector
+                    packages={packages}
+                    selectedId={selectedId}
+                    onSelect={setSelectedId}
+                    currency={currency}
+                  />
+                </div>
+              )}
+
+              {/* Primary CTA — large, full-width, price-aware, subtly pulsing */}
+              <div className="mt-5">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  href={ctaHref}
+                  onClick={handleCtaClick}
+                  className="w-full text-base md:text-lg py-4 cta-pulse"
+                >
+                  {ctaLabel}
                 </Button>
+              </div>
+
+              {/* Social proof line — dynamic, rotates */}
+              <div className="mt-2.5 text-center">
+                <SocialProofBadge />
+              </div>
+
+              {/* Risk reversal short line directly under CTA */}
+              {riskReversal && (
+                <p className="mt-2 text-center text-xs text-[var(--color-text-muted)] flex items-center justify-center gap-1.5">
+                  <svg
+                    className="w-4 h-4 text-[var(--color-success)]"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {riskReversal}
+                </p>
+              )}
+
+              {/* Delivery / payment strip */}
+              {(deliveryInfo || paymentInfo) && (
+                <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-[var(--color-border)]">
+                  {deliveryInfo && (
+                    <div className="flex items-start gap-2 text-xs text-[var(--color-text-muted)]">
+                      <svg
+                        className="w-5 h-5 text-[var(--color-accent)] shrink-0 mt-0.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9-1.5h12.75a.75.75 0 00.75-.75v-7.5A.75.75 0 0018.75 8.25H6.75A.75.75 0 006 9v8.25m0 0H4.875c-.621 0-1.125-.504-1.125-1.125V12c0-2.071 1.679-3.75 3.75-3.75h.375M18 18.75h.75a.75.75 0 00.75-.75V14.25"
+                        />
+                      </svg>
+                      <div>
+                        <p className="font-semibold text-[var(--color-text)]">Dostawa</p>
+                        <p>{deliveryInfo}</p>
+                      </div>
+                    </div>
+                  )}
+                  {paymentInfo && (
+                    <div className="flex items-start gap-2 text-xs text-[var(--color-text-muted)]">
+                      <svg
+                        className="w-5 h-5 text-[var(--color-accent)] shrink-0 mt-0.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
+                        />
+                      </svg>
+                      <div>
+                        <p className="font-semibold text-[var(--color-text)]">Płatności</p>
+                        <p>{paymentInfo}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
-
-            {badges.length > 0 && (
-              <div className="mt-6 flex flex-wrap gap-2">
-                {badges.map((badge, i) => (
-                  <Badge key={i} variant="default">
-                    {badge}
-                  </Badge>
-                ))}
-              </div>
-            )}
           </div>
+        </Container>
+      </section>
 
-          {/* ── Image column ── */}
-          <div className={cn(isSplit ? "relative" : "mx-auto max-w-md", isReverse && "lg:order-1")}>
-            <div className="relative aspect-square rounded-[var(--radius)] overflow-hidden bg-[var(--color-surface)] shadow-[var(--shadow)]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={image}
-                alt={imageAlt}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-        </div>
-      </Container>
-    </section>
+      {/* Sticky mobile buy bar — appears once the hero scrolls out of view */}
+      {selectedPkg && (
+        <MobileBuyBar
+          triggerRef={sectionRef}
+          packageLabel={selectedPkg.label}
+          price={selectedPkg.price}
+          comparePrice={selectedPkg.comparePrice}
+          currency={currency}
+          ctaLabel={selectedPkg.ctaLabel || "Kup teraz"}
+          ctaHref={ctaHref}
+          onCtaClick={handleCtaClick}
+        />
+      )}
+    </>
   );
 }
