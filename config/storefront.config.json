@@ -440,5 +440,26 @@
   "analytics": {
     "provider": "custom",
     "enabled": true
+  },
+  "seller": {
+    "storeName": "SennaRest",
+    "legalCompanyName": "SennaRest sp. z o.o.",
+    "businessAddress": "ul. Senna 12, 00-001 Warszawa",
+    "vatNumber": "PL1234567890",
+    "contactEmail": "kontakt@sennarest.pl",
+    "contactPhone": "+48 123 456 789",
+    "returnPolicyDays": 30,
+    "shippingCountries": "Polska",
+    "dataControllerName": "SennaRest sp. z o.o.",
+    "dataControllerAddress": "ul. Senna 12, 00-001 Warszawa",
+    "storeUrl": "https://sennarest.pl",
+    "additionalNotes": ""
+  },
+  "legalPages": {
+    "returns":  { "slug": "zwroty-i-reklamacje", "title": "Zwroty i reklamacje", "enabled": true },
+    "shipping": { "slug": "wysylka-i-dostawa", "title": "Wysyłka i dostawa", "enabled": true },
+    "privacy":  { "slug": "polityka-prywatnosci", "title": "Polityka prywatności", "enabled": true },
+    "terms":    { "slug": "regulamin", "title": "Regulamin", "enabled": true },
+    "contact":  { "slug": "kontakt", "title": "Kontakt", "enabled": true }
   }
 }

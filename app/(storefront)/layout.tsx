@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getStorefrontConfig } from "@/lib/config/getStorefrontConfig";
 import { buildThemeVariables } from "@/lib/storefront/buildThemeVariables";
 import { createCommerceProvider } from "@/lib/commerce/provider";
-import StorefrontChrome from "@/components/chrome/StorefrontChrome";
+import StorefrontChrome, { Footer } from "@/components/chrome/StorefrontChrome";
 import type { StorefrontConfig } from "@/types/storefront";
 
 /**
@@ -106,8 +106,15 @@ export default async function StorefrontLayout({
         storeId={storeId}
         apiUrl={apiUrl}
         pluginHandoffUrl={config.commerce?.pluginHandoffUrl}
+        legalPages={config.legalPages}
+        contactEmail={config.seller?.contactEmail}
       />
       {children}
+      <Footer
+        branding={config.branding}
+        legalPages={config.legalPages}
+        contactEmail={config.seller?.contactEmail}
+      />
     </div>
   );
 }

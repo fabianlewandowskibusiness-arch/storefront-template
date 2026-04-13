@@ -5,8 +5,9 @@ import StorefrontHeader from "./StorefrontHeader";
 import HeaderCtaStrip from "./HeaderCtaStrip";
 import NavigationDrawer from "./NavigationDrawer";
 import CartDrawer from "./CartDrawer";
+import Footer from "./Footer";
 import Toast from "./Toast";
-import type { BrandingConfig } from "@/types/storefront";
+import type { BrandingConfig, LegalPagesConfig } from "@/types/storefront";
 
 interface StorefrontChromeProps {
   branding: BrandingConfig;
@@ -29,6 +30,10 @@ interface StorefrontChromeProps {
    * one from `apiUrl + storeId`.
    */
   pluginHandoffUrl?: string | null;
+  /** Legal pages config — drives footer legal links. */
+  legalPages?: LegalPagesConfig | null;
+  /** Seller contact email — shown in the footer. */
+  contactEmail?: string;
 }
 
 /**
@@ -52,6 +57,8 @@ export default function StorefrontChrome({
   storeId,
   apiUrl,
   pluginHandoffUrl,
+  legalPages,
+  contactEmail,
 }: StorefrontChromeProps) {
   return (
     <>
@@ -69,3 +76,8 @@ export default function StorefrontChrome({
     </>
   );
 }
+
+// Re-export Footer separately — it's rendered outside the chrome "use client"
+// island in the layout, after {children}, so it sits at the bottom of the page
+// content rather than above it.
+export { Footer };

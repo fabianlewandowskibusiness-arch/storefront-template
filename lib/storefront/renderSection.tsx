@@ -16,7 +16,8 @@ import TestimonialsSection from "@/components/sections/TestimonialsSection";
 import OfferSection from "@/components/sections/OfferSection";
 import FaqSection from "@/components/sections/FaqSection";
 import FinalCtaSection from "@/components/sections/FinalCtaSection";
-import FooterSection from "@/components/sections/FooterSection";
+// FooterSection import removed — footer is now chrome-level (components/chrome/Footer.tsx).
+// The FOOTER case returns null; the import is no longer needed.
 import UgcSection from "@/components/sections/UgcSection";
 import ExpertSection from "@/components/sections/ExpertSection";
 import StorySection from "@/components/sections/StorySection";
@@ -326,24 +327,17 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
         />
       );
 
-    // ── FOOTER ───────────────────────────────────────────────────────────────
-    // Canonical: settings.contactEmail, settings.links — { label, href }[]
-    case "FOOTER": {
-      type FooterLink = { label?: string; href?: string };
-      const links = arr<FooterLink>(settings, "links").map((l) => ({
-        label: l.label ?? "",
-        href: l.href ?? "",
-      }));
-      return (
-        <FooterSection
-          key={section.id}
-          storeName={ctx.branding.storeName}
-          logoUrl={ctx.branding.logoUrl || undefined}
-          contactEmail={s(settings, "contactEmail")}
-          links={links}
-        />
-      );
-    }
+    // ── FOOTER (deprecated — chrome Footer is the canonical footer) ────────
+    //
+    // The footer is now rendered by the chrome-level <Footer /> component in
+    // the storefront layout (components/chrome/Footer.tsx). It uses branding,
+    // sectionRegistry, and legalPages — not this section's settings.
+    //
+    // Old configs may still include a FOOTER section. We keep the enum value
+    // in the schema so those configs parse without error, but the renderer
+    // returns null so no duplicate footer ever appears on the page.
+    case "FOOTER":
+      return null;
 
     // ── UGC ──────────────────────────────────────────────────────────────────
     // Canonical: settings.title, settings.description,

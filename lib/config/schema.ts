@@ -150,6 +150,47 @@ const seoSchema = z.object({
   noIndex:       z.boolean().nullish(),
 });
 
+// ── Seller ───────────────────────────────────────────────────────────────────
+//
+// Business identity and legal contact details. Used by legal page templates
+// to render returns policy, privacy policy, terms, etc. with real seller data
+// instead of placeholders. Absent in older / incomplete configs.
+
+const sellerSchema = z.object({
+  storeName:             z.string().catch(""),
+  legalCompanyName:      z.string().catch(""),
+  businessAddress:       z.string().catch(""),
+  vatNumber:             z.string().catch(""),
+  contactEmail:          z.string().catch(""),
+  contactPhone:          z.string().catch(""),
+  returnPolicyDays:      z.number().catch(14),
+  shippingCountries:     z.string().catch(""),
+  dataControllerName:    z.string().catch(""),
+  dataControllerAddress: z.string().catch(""),
+  storeUrl:              z.string().catch(""),
+  additionalNotes:       z.string().catch(""),
+});
+
+// ── Legal pages ──────────────────────────────────────────────────────────────
+//
+// Each key maps to one legal page type. The backend sets `enabled` and
+// provides the slug/title. The storefront only renders pages that are
+// enabled and present in the object.
+
+const legalPageEntrySchema = z.object({
+  slug:    z.string(),
+  title:   z.string(),
+  enabled: z.boolean().catch(false),
+});
+
+const legalPagesSchema = z.object({
+  returns:  legalPageEntrySchema.nullable().optional(),
+  shipping: legalPageEntrySchema.nullable().optional(),
+  privacy:  legalPageEntrySchema.nullable().optional(),
+  terms:    legalPageEntrySchema.nullable().optional(),
+  contact:  legalPageEntrySchema.nullable().optional(),
+});
+
 // ── Top-level config ──────────────────────────────────────────────────────────
 
 export const storefrontConfigSchema = z.object({
@@ -165,4 +206,8 @@ export const storefrontConfigSchema = z.object({
   analytics: analyticsSchema.catch({ provider: "custom", enabled: true }),
   // seo: absent in older configs generated before SEO support was introduced.
   seo: seoSchema.nullable().optional(),
+  // seller: business identity data, used by legal page templates.
+  seller: sellerSchema.nullable().optional(),
+  // legalPages: routing config for legal pages (returns, shipping, privacy, terms, contact).
+  legalPages: legalPagesSchema.nullable().optional(),
 });

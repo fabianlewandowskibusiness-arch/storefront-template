@@ -17,7 +17,7 @@ export type SectionType =
   | "OFFER"
   | "FAQ"
   | "CTA"
-  | "FOOTER"
+  | "FOOTER" // Deprecated — chrome Footer is the canonical footer. Kept for config compat.
   // High-conversion DTC redesign — new section types
   | "UGC"
   | "EXPERT"
@@ -386,12 +386,45 @@ export interface AnalyticsConfig {
 }
 
 export interface SeoConfig {
-  // Text fields are nullish — the backend may send null for any field it could
-  // not generate.  The metadata layer uses || fallbacks for all of these.
   title?: string | null;
   description?: string | null;
   ogTitle?: string | null;
   ogDescription?: string | null;
   ogImage?: string | null;
   noIndex?: boolean | null;
+}
+
+// ── Seller ──────────────────────────────────────────────────────────────────
+
+export interface SellerConfig {
+  storeName: string;
+  legalCompanyName: string;
+  businessAddress: string;
+  vatNumber: string;
+  contactEmail: string;
+  contactPhone: string;
+  returnPolicyDays: number;
+  shippingCountries: string;
+  dataControllerName: string;
+  dataControllerAddress: string;
+  storeUrl: string;
+  additionalNotes: string;
+}
+
+// ── Legal pages ─────────────────────────────────────────────────────────────
+
+export interface LegalPageEntry {
+  slug: string;
+  title: string;
+  enabled: boolean;
+}
+
+export type LegalPageKey = "returns" | "shipping" | "privacy" | "terms" | "contact";
+
+export interface LegalPagesConfig {
+  returns?: LegalPageEntry | null;
+  shipping?: LegalPageEntry | null;
+  privacy?: LegalPageEntry | null;
+  terms?: LegalPageEntry | null;
+  contact?: LegalPageEntry | null;
 }
