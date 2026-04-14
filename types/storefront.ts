@@ -75,7 +75,7 @@ export interface HeroPackage {
 //
 // These interfaces mirror the Java typed section models in
 // com.ecommerceflow.storefront.domain.layout.sections.
-// They define the expected shape of StorefrontSection.settings for each
+// They define the expected shape of StorefrontSection.data for each
 // section type, allowing renderers to safely cast from Record<string, unknown>.
 
 // ── Trust signals ─────────────────────────────────────────────────────────────
@@ -314,18 +314,11 @@ export interface FaqSectionSettings {
   items?: FaqItem[];
 }
 
-export interface StorefrontBlock {
-  id: string;
-  type: string;
-  settings: Record<string, unknown> | null;
-}
-
 export interface StorefrontSection {
   id: string;
   type: SectionType;
   position: number;
-  settings: Record<string, unknown> | null;
-  blocks: StorefrontBlock[];
+  data: Record<string, unknown> | null;
 }
 
 export interface StorefrontPage {

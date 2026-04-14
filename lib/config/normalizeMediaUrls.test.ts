@@ -124,11 +124,7 @@ describe("walkAndRewrite", () => {
           sections: [
             {
               type: "HERO",
-              settings: { image: "http://localhost:8080/api/storage/local/hero.jpg" },
-              blocks: [
-                { settings: { avatar: "/api/storage/local/avatar-1.svg" } },
-                { settings: { text: "Bold copy here" } },
-              ],
+              data: { image: "http://localhost:8080/api/storage/local/hero.jpg" },
             },
           ],
         },
@@ -137,13 +133,9 @@ describe("walkAndRewrite", () => {
 
     const result = walkAndRewrite(input, PUBLIC_ORIGIN);
     expect(result.branding.logoUrl).toBe(`${PUBLIC_ORIGIN}/api/storage/local/logo.png`);
-    expect(result.pages[0].sections[0].settings.image).toBe(
+    expect(result.pages[0].sections[0].data.image).toBe(
       `${PUBLIC_ORIGIN}/api/storage/local/hero.jpg`,
     );
-    expect(result.pages[0].sections[0].blocks[0].settings.avatar).toBe(
-      `${PUBLIC_ORIGIN}/api/storage/local/avatar-1.svg`,
-    );
-    expect(result.pages[0].sections[0].blocks[1].settings.text).toBe("Bold copy here");
   });
 
   it("does not mutate the original input", () => {

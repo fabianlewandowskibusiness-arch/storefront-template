@@ -19,7 +19,7 @@ import type { SectionEntry } from "@/lib/stores/sectionRegistry";
 function findHeroImage(page: StorefrontPage): string | undefined {
   const hero = page.sections.find((s) => s.type === "HERO");
   if (!hero) return undefined;
-  const gallery = hero.settings?.gallery;
+  const gallery = hero.data?.gallery;
   if (Array.isArray(gallery) && gallery.length > 0) {
     const first = gallery[0];
     return typeof first === "string" && first.length > 0 ? first : undefined;
@@ -60,10 +60,10 @@ const TYPE_LABELS: Record<SectionType, string> = {
 };
 
 function resolveSectionLabel(section: StorefrontSection): string {
-  const settings = section.settings ?? {};
-  const title = (settings.title as string | undefined)?.trim();
+  const data = section.data ?? {};
+  const title = (data.title as string | undefined)?.trim();
   if (title) return title;
-  const headline = (settings.headline as string | undefined)?.trim();
+  const headline = (data.headline as string | undefined)?.trim();
   if (headline) return headline;
   return TYPE_LABELS[section.type] || "";
 }

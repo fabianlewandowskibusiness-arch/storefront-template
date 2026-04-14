@@ -48,12 +48,6 @@ const brandingSchema = z.object({
 
 // ── Sections & pages ──────────────────────────────────────────────────────────
 
-const blockSchema = z.object({
-  id:   z.string(),
-  type: z.string(),
-  settings: z.record(z.string(), z.unknown()).nullable().default({}),
-});
-
 const sectionSchema = z.object({
   // id and type remain strict — they are structural identifiers.
   // An unknown section type is a real error (renderSection cannot handle it).
@@ -79,8 +73,7 @@ const sectionSchema = z.object({
   // position: AI may omit or send null — recover to 0 so sort still works
   // and other sections render in a reasonable order.
   position: z.number().catch(0),
-  settings: z.record(z.string(), z.unknown()).nullable().default({}),
-  blocks:   z.array(blockSchema).default([]),
+  data:     z.record(z.string(), z.unknown()).nullable().default({}),
 });
 
 const pageSchema = z.object({

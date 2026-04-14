@@ -33,7 +33,7 @@
           "id": "announcement-1",
           "type": "ANNOUNCEMENT",
           "position": 0,
-          "settings": {
+          "data": {
             "items": [
               { "text": "🚚 Darmowa dostawa od 0 zł" },
               { "text": "🔁 30 dni na zwrot" },
@@ -41,15 +41,13 @@
               { "text": "⚡ Wysyłka w 24h" },
               { "text": "🛡 Certyfikat OEKO-TEX" }
             ]
-          },
-          "blocks": []
+          }
         },
-
         {
           "id": "hero-1",
           "type": "HERO",
           "position": 1,
-          "settings": {
+          "data": {
             "headline": "Obudź się bez bólu karku",
             "subheadline": "Ergonomiczna poduszka, która dopasowuje się do Ciebie",
             "description": "Pianka memory z certyfikatem OEKO-TEX. Dwustrefowy rdzeń. Regulowana wysokość. Dla każdej pozycji snu.",
@@ -97,15 +95,13 @@
                 "savingsText": "Oszczędzasz 388 zł"
               }
             ]
-          },
-          "blocks": []
+          }
         },
-
         {
           "id": "ugc-1",
           "type": "UGC",
           "position": 2,
-          "settings": {
+          "data": {
             "title": "Tysiące zadowolonych klientów",
             "description": "Zobacz, jak SennaRest zmieniło sen naszych użytkowników",
             "items": [
@@ -194,30 +190,26 @@
                 "caption": "Kupiłem do akademika, bo stare poduszki były tragiczne. Różnica kolosalna — pierwszy raz od lat wstaję wypoczęty."
               }
             ]
-          },
-          "blocks": []
+          }
         },
-
         {
           "id": "expert-1",
           "type": "EXPERT",
           "position": 3,
-          "settings": {
+          "data": {
             "title": "Rekomendowane przez fizjoterapeutów",
             "description": "Współpracujemy z certyfikowanymi specjalistami od kręgosłupa szyjnego, by zaprojektować poduszkę, która rzeczywiście wspiera Twoje ciało — niezależnie od pozycji snu.",
             "expertName": "Dr Anna Kowalska",
             "expertRole": "Fizjoterapeutka, specjalistka kręgosłupa",
             "expertImage": "/images/placeholder-avatar-1.svg",
             "quote": "Dwustrefowa konstrukcja SennaRest to jedna z najlepszych poduszek ortopedycznych, jakie miałam okazję testować w gabinecie. Polecam ją moim pacjentom z bólem karku."
-          },
-          "blocks": []
+          }
         },
-
         {
           "id": "comparison-1",
           "type": "COMPARISON",
           "position": 4,
-          "settings": {
+          "data": {
             "title": "Dlaczego SennaRest jest inna",
             "subtitle": "Większość poduszek wygląda podobnie. Różnice zaczynają się pod powierzchnią — i to one decydują o tym, czy rano obudzisz się bez bólu.",
             "rows": [
@@ -252,34 +244,48 @@
                 "competitorValue": "14 dni, pod warunkiem oryginalnego opakowania i dokumentów zakupu."
               }
             ]
-          },
-          "blocks": []
+          }
         },
-
         {
           "id": "benefits-1",
           "type": "BENEFITS",
           "position": 5,
-          "settings": {
+          "data": {
             "title": "Co zyskujesz",
             "_sectionVariant": "grid-3",
             "items": [
-              { "title": "Mniej bólu", "description": "Ergonomiczny kształt redukuje napięcie szyi i ramion już od pierwszej nocy." },
-              { "title": "Głębszy sen", "description": "Pianka memory dopasowuje się do Twojego ciała, eliminując punkty nacisku." },
-              { "title": "Bez przegrzewania", "description": "Bambusowy pokrowiec reguluje temperaturę i odprowadza wilgoć przez całą noc." },
-              { "title": "Każda pozycja", "description": "Działa na boku, plecach i brzuchu dzięki regulowanej wysokości." },
-              { "title": "Hipoalergiczne", "description": "Certyfikowane włókno bambusowe — bezpieczne dla alergików i wrażliwej skóry." },
-              { "title": "Lata trwałości", "description": "Pianka zachowuje kształt minimum 3 lata regularnego użytkowania." }
+              {
+                "title": "Mniej bólu",
+                "description": "Ergonomiczny kształt redukuje napięcie szyi i ramion już od pierwszej nocy."
+              },
+              {
+                "title": "Głębszy sen",
+                "description": "Pianka memory dopasowuje się do Twojego ciała, eliminując punkty nacisku."
+              },
+              {
+                "title": "Bez przegrzewania",
+                "description": "Bambusowy pokrowiec reguluje temperaturę i odprowadza wilgoć przez całą noc."
+              },
+              {
+                "title": "Każda pozycja",
+                "description": "Działa na boku, plecach i brzuchu dzięki regulowanej wysokości."
+              },
+              {
+                "title": "Hipoalergiczne",
+                "description": "Certyfikowane włókno bambusowe — bezpieczne dla alergików i wrażliwej skóry."
+              },
+              {
+                "title": "Lata trwałości",
+                "description": "Pianka zachowuje kształt minimum 3 lata regularnego użytkowania."
+              }
             ]
-          },
-          "blocks": []
+          }
         },
-
         {
           "id": "story-1",
           "type": "STORY",
           "position": 6,
-          "settings": {
+          "data": {
             "title": "Dlaczego stworzyliśmy SennaRest",
             "description": "Po latach pracy przy biurku i niezliczonych nocach z bólem karku wiedzieliśmy jedno: tradycyjne poduszki nas zawodzą.",
             "media": "/images/product-detail-2.svg",
@@ -297,32 +303,40 @@
                 "body": "Zanim trafiła do sprzedaży, SennaRest była testowana przez ponad 200 osób z różnymi pozycjami snu. Wyniki: 94% zgłosiło zauważalne zmniejszenie bólu karku w ciągu pierwszych dwóch tygodni."
               }
             ]
-          },
-          "blocks": []
+          }
         },
-
         {
           "id": "problem-1",
           "type": "PROBLEM",
           "position": 7,
-          "settings": {
+          "data": {
             "title": "Czy któraś z tych sytuacji brzmi znajomo?",
             "description": "Jeśli tak, prawdopodobnie Twoja poduszka jest częścią problemu.",
             "items": [
-              { "title": "Budzisz się ze sztywnym karkiem", "description": "Zła pozycja głowy w nocy obciąża kręgosłup szyjny. Po przebudzeniu czujesz się tak, jakbyś nie spał wcale — mimo 8 godzin w łóżku." },
-              { "title": "Twoja poduszka straciła kształt", "description": "Pianka, pierze i polyester zapadają się po kilku miesiącach. Głowa opada, kręgosłup się wykrzywia, a Ty obracasz się w nocy szukając wygodnej pozycji." },
-              { "title": "Nie potrafisz znaleźć dobrej pozycji", "description": "Zbyt wysoka, zbyt niska, zbyt twarda. Większość poduszek jest projektowana \"dla wszystkich\" — czyli dla nikogo konkretnego." },
-              { "title": "Pocisz się i przegrzewasz w nocy", "description": "Syntetyczne materiały zatrzymują ciepło i wilgoć. Budzisz się spocony, a poduszka pachnie nieprzyjemnie po kilku tygodniach." }
+              {
+                "title": "Budzisz się ze sztywnym karkiem",
+                "description": "Zła pozycja głowy w nocy obciąża kręgosłup szyjny. Po przebudzeniu czujesz się tak, jakbyś nie spał wcale — mimo 8 godzin w łóżku."
+              },
+              {
+                "title": "Twoja poduszka straciła kształt",
+                "description": "Pianka, pierze i polyester zapadają się po kilku miesiącach. Głowa opada, kręgosłup się wykrzywia, a Ty obracasz się w nocy szukając wygodnej pozycji."
+              },
+              {
+                "title": "Nie potrafisz znaleźć dobrej pozycji",
+                "description": "Zbyt wysoka, zbyt niska, zbyt twarda. Większość poduszek jest projektowana \"dla wszystkich\" — czyli dla nikogo konkretnego."
+              },
+              {
+                "title": "Pocisz się i przegrzewasz w nocy",
+                "description": "Syntetyczne materiały zatrzymują ciepło i wilgoć. Budzisz się spocony, a poduszka pachnie nieprzyjemnie po kilku tygodniach."
+              }
             ]
-          },
-          "blocks": []
+          }
         },
-
         {
           "id": "risk-1",
           "type": "RISK_REVERSAL",
           "position": 8,
-          "settings": {
+          "data": {
             "title": "Nie podoba Ci się? Zwracamy pieniądze",
             "guaranteeText": "30 dni gwarancji satysfakcji",
             "description": "Daj sobie miesiąc na test. Jeśli SennaRest nie poprawi Twojego snu, oddasz poduszkę i otrzymasz pełny zwrot — bez pytań, bez papierologii.",
@@ -331,15 +345,13 @@
               "Testuj 30 dni — większość użytkowników zauważa zmianę szybciej",
               "Pełny zwrot — odeślemy kuriera i zwrócimy 100% kwoty w 5 dni roboczych"
             ]
-          },
-          "blocks": []
+          }
         },
-
         {
           "id": "testimonials-1",
           "type": "TESTIMONIALS",
           "position": 9,
-          "settings": {
+          "data": {
             "title": "Co mówią nasi klienci",
             "testimonials": [
               {
@@ -369,33 +381,47 @@
                 "quoteShort": "Jestem fizjoterapeutą i poleciłem SennaRest kilkunastu pacjentom. Wszyscy zgłaszają poprawę. Sam też używam — mimo, że znam się na temacie, ta poduszka mnie pozytywnie zaskoczyła."
               }
             ]
-          },
-          "blocks": []
+          }
         },
-
         {
           "id": "faq-1",
           "type": "FAQ",
           "position": 10,
-          "settings": {
+          "data": {
             "title": "Często zadawane pytania",
             "items": [
-              { "question": "Czy poduszka nadaje się do spania na boku?", "answer": "Tak. SennaRest jest zaprojektowana dla wszystkich pozycji snu. Dwustrefowy rdzeń i regulowane wkładki pozwalają dostosować wysokość — zarówno do snu na boku, plecach, jak i brzuchu. To jeden z głównych powodów, dla których ją stworzyliśmy." },
-              { "question": "Jak długo trwa efekt? Kiedy poczuję poprawę?", "answer": "Większość użytkowników zauważa zmianę po 3–7 nocach. Pełna adaptacja zajmuje około 2 tygodni — Twoje ciało musi się przyzwyczaić do nowego, prawidłowego ułożenia kręgosłupa szyjnego. Dlatego dajemy 30 dni na test." },
-              { "question": "Jak prać pokrowiec?", "answer": "Pokrowiec bambusowy zdejmuje się błyskawicznie — prać można w pralce w 40°C. Zalecamy delikatne wirowanie i suszenie na powietrzu, by zachować właściwości materiału. Rdzeń pianki memory wystarczy raz w miesiącu przewietrzyć." },
-              { "question": "Ile trwa dostawa i ile kosztuje?", "answer": "Dostawa jest darmowa dla wszystkich zamówień. Wysyłamy w ciągu 24 godzin od złożenia zamówienia (dni robocze). Standardowy czas dostawy kurierem to 1–2 dni robocze na terenie całej Polski." },
-              { "question": "Czy mogę zwrócić poduszkę, jeśli mi nie pasuje?", "answer": "Oczywiście. Masz pełne 30 dni na test. Jeśli poduszka nie spełni Twoich oczekiwań, napisz do nas — zorganizujemy darmowy odbiór kuriera i zwrócimy 100% kwoty w ciągu 5 dni roboczych. Bez pytań i bez konieczności tłumaczenia." },
-              { "question": "Czy poduszka jest hipoalergiczna?", "answer": "Tak. Pokrowiec wykonany z włókna bambusowego jest naturalnie antybakteryjny i hipoalergiczny. Pianka memory nie gromadzi kurzu ani roztoczy. Posiadamy certyfikat OEKO-TEX Standard 100 — co oznacza, że żadne szkodliwe substancje nie zostały użyte w produkcji." }
+              {
+                "question": "Czy poduszka nadaje się do spania na boku?",
+                "answer": "Tak. SennaRest jest zaprojektowana dla wszystkich pozycji snu. Dwustrefowy rdzeń i regulowane wkładki pozwalają dostosować wysokość — zarówno do snu na boku, plecach, jak i brzuchu. To jeden z głównych powodów, dla których ją stworzyliśmy."
+              },
+              {
+                "question": "Jak długo trwa efekt? Kiedy poczuję poprawę?",
+                "answer": "Większość użytkowników zauważa zmianę po 3–7 nocach. Pełna adaptacja zajmuje około 2 tygodni — Twoje ciało musi się przyzwyczaić do nowego, prawidłowego ułożenia kręgosłupa szyjnego. Dlatego dajemy 30 dni na test."
+              },
+              {
+                "question": "Jak prać pokrowiec?",
+                "answer": "Pokrowiec bambusowy zdejmuje się błyskawicznie — prać można w pralce w 40°C. Zalecamy delikatne wirowanie i suszenie na powietrzu, by zachować właściwości materiału. Rdzeń pianki memory wystarczy raz w miesiącu przewietrzyć."
+              },
+              {
+                "question": "Ile trwa dostawa i ile kosztuje?",
+                "answer": "Dostawa jest darmowa dla wszystkich zamówień. Wysyłamy w ciągu 24 godzin od złożenia zamówienia (dni robocze). Standardowy czas dostawy kurierem to 1–2 dni robocze na terenie całej Polski."
+              },
+              {
+                "question": "Czy mogę zwrócić poduszkę, jeśli mi nie pasuje?",
+                "answer": "Oczywiście. Masz pełne 30 dni na test. Jeśli poduszka nie spełni Twoich oczekiwań, napisz do nas — zorganizujemy darmowy odbiór kuriera i zwrócimy 100% kwoty w ciągu 5 dni roboczych. Bez pytań i bez konieczności tłumaczenia."
+              },
+              {
+                "question": "Czy poduszka jest hipoalergiczna?",
+                "answer": "Tak. Pokrowiec wykonany z włókna bambusowego jest naturalnie antybakteryjny i hipoalergiczny. Pianka memory nie gromadzi kurzu ani roztoczy. Posiadamy certyfikat OEKO-TEX Standard 100 — co oznacza, że żadne szkodliwe substancje nie zostały użyte w produkcji."
+              }
             ]
-          },
-          "blocks": []
+          }
         },
-
         {
           "id": "cta-1",
           "type": "CTA",
           "position": 11,
-          "settings": {
+          "data": {
             "headline": "Zacznij spać lepiej już dziś",
             "subheadline": "Dołącz do ponad 5 000 osób, które odzyskały zdrowy sen dzięki SennaRest.",
             "buttonLabel": "Zamów z darmową dostawą",
@@ -405,23 +431,20 @@
               "Wysyłka 24h",
               "Bezpieczne płatności"
             ]
-          },
-          "blocks": []
+          }
         },
-
         {
           "id": "footer-1",
           "type": "FOOTER",
           "position": 12,
-          "settings": {
+          "data": {
             "contactEmail": "kontakt@sennarest.pl",
             "links": [
               { "label": "Polityka prywatności", "href": "/privacy" },
               { "label": "Regulamin", "href": "/terms" },
               { "label": "Zwroty i reklamacje", "href": "/returns" }
             ]
-          },
-          "blocks": []
+          }
         }
       ]
     }
@@ -456,10 +479,30 @@
     "additionalNotes": ""
   },
   "legalPages": {
-    "returns":  { "slug": "zwroty-i-reklamacje", "title": "Zwroty i reklamacje", "enabled": true },
-    "shipping": { "slug": "wysylka-i-dostawa", "title": "Wysyłka i dostawa", "enabled": true },
-    "privacy":  { "slug": "polityka-prywatnosci", "title": "Polityka prywatności", "enabled": true },
-    "terms":    { "slug": "regulamin", "title": "Regulamin", "enabled": true },
-    "contact":  { "slug": "kontakt", "title": "Kontakt", "enabled": true }
+    "returns": {
+      "slug": "zwroty-i-reklamacje",
+      "title": "Zwroty i reklamacje",
+      "enabled": true
+    },
+    "shipping": {
+      "slug": "wysylka-i-dostawa",
+      "title": "Wysyłka i dostawa",
+      "enabled": true
+    },
+    "privacy": {
+      "slug": "polityka-prywatnosci",
+      "title": "Polityka prywatności",
+      "enabled": true
+    },
+    "terms": {
+      "slug": "regulamin",
+      "title": "Regulamin",
+      "enabled": true
+    },
+    "contact": {
+      "slug": "kontakt",
+      "title": "Kontakt",
+      "enabled": true
+    }
   }
 }

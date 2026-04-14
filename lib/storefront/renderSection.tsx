@@ -33,39 +33,38 @@ interface RenderContext {
   heroImage?: string;
 }
 
-// ── Settings helpers ──────────────────────────────────────────────────────────
+// ── Data helpers ─────────────────────────────────────────────────────────────
 //
-// All section content is in `settings`. The `blocks` field is part of the API
-// contract but is not read by the renderer — `settings` is the single source
-// of truth for all section content.
+// All section content is in `data` — the single source of truth for all
+// section content. The renderer reads exclusively from this field.
 
-function s(settings: Record<string, unknown> | null, key: string): string {
-  return (settings?.[key] as string) ?? "";
+function s(data: Record<string, unknown> | null, key: string): string {
+  return (data?.[key] as string) ?? "";
 }
 
-function sNum(settings: Record<string, unknown> | null, key: string): number {
-  const v = settings?.[key];
+function sNum(data: Record<string, unknown> | null, key: string): number {
+  const v = data?.[key];
   return typeof v === "number" ? v : 0;
 }
 
-function sBool(settings: Record<string, unknown> | null, key: string): boolean {
-  return Boolean(settings?.[key]);
+function sBool(data: Record<string, unknown> | null, key: string): boolean {
+  return Boolean(data?.[key]);
 }
 
-function arr<T>(settings: Record<string, unknown> | null, key: string): T[] {
-  const v = settings?.[key];
+function arr<T>(data: Record<string, unknown> | null, key: string): T[] {
+  const v = data?.[key];
   return Array.isArray(v) ? (v as T[]) : [];
 }
 
 // ── Shell override extraction ──────────────────────────────────────────────────
 
 function extractShellOverride(
-  settings: Record<string, unknown> | null,
+  data: Record<string, unknown> | null,
 ): ShellOverride | undefined {
-  if (!settings) return undefined;
-  const bg = settings._backgroundStyle as ShellOverride["backgroundStyle"] | undefined;
-  const pt = settings._paddingTop as ShellOverride["paddingTop"] | undefined;
-  const pb = settings._paddingBottom as ShellOverride["paddingBottom"] | undefined;
+  if (!data) return undefined;
+  const bg = data._backgroundStyle as ShellOverride["backgroundStyle"] | undefined;
+  const pt = data._paddingTop as ShellOverride["paddingTop"] | undefined;
+  const pb = data._paddingBottom as ShellOverride["paddingBottom"] | undefined;
   if (!bg && !pt && !pb) return undefined;
   return { backgroundStyle: bg, paddingTop: pt, paddingBottom: pb };
 }
@@ -73,13 +72,13 @@ function extractShellOverride(
 // ── Main renderer ─────────────────────────────────────────────────────────────
 
 export function renderSection(section: StorefrontSection, ctx: RenderContext) {
-  const settings = section.settings ?? {};
+  const data = section.data ?? {};
 
   // Visibility flag — skip hidden sections entirely.
-  if (settings._visible === false) return null;
+  if (data._visible === false) return null;
 
-  const shellOverride = extractShellOverride(settings);
-  const sectionVariant = (settings._sectionVariant as string) || "";
+  const shellOverride = extractShellOverride(data);
+  const sectionVariant = (data._sectionVariant as string) || "";
 
   switch (section.type) {
     // ── ANNOUNCEMENT ────────────────────────────────────────────────────────
@@ -91,7 +90,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
       return null;
 
     // ── HERO ─────────────────────────────────────────────────────────────────
-    // Canonical settings:
+    // Canonical data:
     //   gallery: string[]                     — ordered product image URLs
     //   packages: PackageOption[]             — { name, quantity, price, compareAtPrice, label, isDefault, savingsText, badge, ctaHref, ... }
     //   bullets: string[]                     — short ≤5-word benefit phrases
@@ -101,7 +100,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
     //   stickyBuyBar: StickyBuyBarSettings
     case "HERO": {
       // Gallery: string[] → GalleryItem[]
-      const gallery: GalleryItem[] = arr<string>(settings, "gallery").map(
+      const gallery: GalleryItem[] = arr<string>(data, "gallery").map(
         (url) => ({ url, alt: ctx.branding.productName, type: "image" as const }),
       );
 
@@ -118,7 +117,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
         productId?: string;
         variationId?: string;
       };
-      const packages: HeroPackage[] = arr<PkgOpt>(settings, "packages").map(
+      const packages: HeroPackage[] = arr<PkgOpt>(data, "packages").map(
         (pkg, i) => ({
           id: `pkg-${i}`,
           label: pkg.name ?? "",
@@ -136,30 +135,30 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
         }),
       );
 
-      const bullets = arr<string>(settings, "bullets");
+      const bullets = arr<string>(data, "bullets");
 
-      // Social proof — canonical: settings.socialProof object
+      // Social proof — canonical: data.socialProof object
       type SocialProof = { averageRating?: number; reviewCount?: number };
-      const sp = settings.socialProof as SocialProof | undefined;
+      const sp = data.socialProof as SocialProof | undefined;
 
       return (
         <HeroSection
           key={section.id}
-          headline={s(settings, "headline")}
-          subheadline={s(settings, "subheadline") || undefined}
-          description={s(settings, "description") || undefined}
+          headline={s(data, "headline")}
+          subheadline={s(data, "subheadline") || undefined}
+          description={s(data, "description") || undefined}
           rating={sp?.averageRating || undefined}
           reviewCount={sp?.reviewCount || undefined}
           bullets={bullets}
-          trustBadge={s(settings, "trustBadge") || undefined}
-          riskReversal={s(settings, "riskReversal") || undefined}
-          deliveryInfo={s(settings, "deliveryInfo") || undefined}
-          paymentInfo={s(settings, "paymentInfo") || undefined}
+          trustBadge={s(data, "trustBadge") || undefined}
+          riskReversal={s(data, "riskReversal") || undefined}
+          deliveryInfo={s(data, "deliveryInfo") || undefined}
+          paymentInfo={s(data, "paymentInfo") || undefined}
           gallery={gallery}
           packages={packages}
           fallbackCheckoutUrl={ctx.checkoutUrl}
           fallbackCtaLabel={
-            s(settings, "primaryCtaLabel") ||
+            s(data, "primaryCtaLabel") ||
             ctx.commerce?.ctaButtonLabel ||
             "Kup teraz"
           }
@@ -170,58 +169,58 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
     }
 
     // ── TRUST_BAR ────────────────────────────────────────────────────────────
-    // Canonical: settings.items — string[]
+    // Canonical: data.items — string[]
     case "TRUST_BAR":
       return (
         <TrustBarSection
           key={section.id}
-          items={arr<string>(settings, "items")}
+          items={arr<string>(data, "items")}
         />
       );
 
     // ── BENEFITS ─────────────────────────────────────────────────────────────
-    // Canonical: settings.title, settings.items — BenefitItem[]
+    // Canonical: data.title, data.items — BenefitItem[]
     case "BENEFITS":
       return (
         <BenefitsSection
           key={section.id}
-          title={s(settings, "title")}
+          title={s(data, "title")}
           sectionVariant={sectionVariant}
           shellOverride={shellOverride}
           items={
-            arr<{ title: string; description: string }>(settings, "items")
+            arr<{ title: string; description: string }>(data, "items")
           }
         />
       );
 
     // ── PROBLEM ──────────────────────────────────────────────────────────────
-    // Canonical: settings.title, settings.description, settings.items — ProblemItem[]
+    // Canonical: data.title, data.description, data.items — ProblemItem[]
     case "PROBLEM":
       return (
         <ProblemSection
           key={section.id}
-          title={s(settings, "title")}
-          description={s(settings, "description") || undefined}
-          items={arr<{ title: string; description: string }>(settings, "items")}
+          title={s(data, "title")}
+          description={s(data, "description") || undefined}
+          items={arr<{ title: string; description: string }>(data, "items")}
           shellOverride={shellOverride}
         />
       );
 
     // ── FEATURES ─────────────────────────────────────────────────────────────
-    // Canonical: settings.title, settings.items — { name, description }[]
+    // Canonical: data.title, data.items — { name, description }[]
     case "FEATURES":
       return (
         <FeaturesSection
           key={section.id}
-          title={s(settings, "title")}
+          title={s(data, "title")}
           shellOverride={shellOverride}
-          items={arr<{ name: string; description: string }>(settings, "items")}
+          items={arr<{ name: string; description: string }>(data, "items")}
         />
       );
 
     // ── COMPARISON ───────────────────────────────────────────────────────────
-    // Canonical: settings.title, settings.subtitle,
-    //            settings.rows — { feature, productValue, competitorValue }[]
+    // Canonical: data.title, data.subtitle,
+    //            data.rows — { feature, productValue, competitorValue }[]
     // renderSection maps backend field names → component prop names
     case "COMPARISON": {
       type CompRow = {
@@ -229,7 +228,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
         productValue?: string;
         competitorValue?: string;
       };
-      const rows = arr<CompRow>(settings, "rows").map((r) => ({
+      const rows = arr<CompRow>(data, "rows").map((r) => ({
         label: r.feature ?? "",
         ours: r.productValue ?? "",
         other: r.competitorValue ?? "",
@@ -237,8 +236,8 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
       return (
         <ComparisonSection
           key={section.id}
-          title={s(settings, "title")}
-          subtitle={s(settings, "subtitle") || undefined}
+          title={s(data, "title")}
+          subtitle={s(data, "subtitle") || undefined}
           brandName={ctx.branding.productName}
           productImage={ctx.heroImage}
           shellOverride={shellOverride}
@@ -248,7 +247,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
     }
 
     // ── TESTIMONIALS ─────────────────────────────────────────────────────────
-    // Canonical: settings.title, settings.testimonials — Testimonial[]
+    // Canonical: data.title, data.testimonials — Testimonial[]
     // renderSection maps Testimonial fields → component prop names
     case "TESTIMONIALS": {
       type TestItem = {
@@ -259,7 +258,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
         rating?: number;
         location?: string;
       };
-      const items = arr<TestItem>(settings, "testimonials").map((t) => ({
+      const items = arr<TestItem>(data, "testimonials").map((t) => ({
         name: t.authorName ?? "",
         quote: t.quoteShort || t.quoteLong || "",
         avatar: t.avatarUrl || undefined,
@@ -269,7 +268,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
       return (
         <TestimonialsSection
           key={section.id}
-          title={s(settings, "title")}
+          title={s(data, "title")}
           shellOverride={shellOverride}
           items={items}
         />
@@ -277,52 +276,52 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
     }
 
     // ── OFFER ────────────────────────────────────────────────────────────────
-    // Canonical: settings.title, settings.price, settings.compareAtPrice,
-    //            settings.included — string[], settings.guaranteeText, etc.
+    // Canonical: data.title, data.price, data.compareAtPrice,
+    //            data.included — string[], data.guaranteeText, etc.
     case "OFFER":
       return (
         <OfferSection
           key={section.id}
-          title={s(settings, "title")}
-          priceLabel={s(settings, "priceLabel")}
-          price={sNum(settings, "price")}
-          compareAtPrice={sNum(settings, "compareAtPrice") || undefined}
-          currency={s(settings, "currency") || ctx.currency}
-          ctaLabel={s(settings, "ctaLabel") || ctx.commerce?.ctaButtonLabel || ""}
+          title={s(data, "title")}
+          priceLabel={s(data, "priceLabel")}
+          price={sNum(data, "price")}
+          compareAtPrice={sNum(data, "compareAtPrice") || undefined}
+          currency={s(data, "currency") || ctx.currency}
+          ctaLabel={s(data, "ctaLabel") || ctx.commerce?.ctaButtonLabel || ""}
           checkoutUrl={ctx.checkoutUrl}
-          anchorId={s(settings, "anchorId") || "offer"}
-          guaranteeText={s(settings, "guaranteeText")}
+          anchorId={s(data, "anchorId") || "offer"}
+          guaranteeText={s(data, "guaranteeText")}
           shellOverride={shellOverride}
-          included={arr<string>(settings, "included")}
+          included={arr<string>(data, "included")}
         />
       );
 
     // ── FAQ ──────────────────────────────────────────────────────────────────
-    // Canonical: settings.title, settings.items — { question, answer }[]
+    // Canonical: data.title, data.items — { question, answer }[]
     case "FAQ":
       return (
         <FaqSection
           key={section.id}
-          title={s(settings, "title")}
+          title={s(data, "title")}
           shellOverride={shellOverride}
-          items={arr<{ question: string; answer: string }>(settings, "items")}
+          items={arr<{ question: string; answer: string }>(data, "items")}
         />
       );
 
     // ── CTA ──────────────────────────────────────────────────────────────────
-    // Canonical: settings.headline, settings.subheadline, settings.buttonLabel,
-    //            settings.trustItems — string[]
+    // Canonical: data.headline, data.subheadline, data.buttonLabel,
+    //            data.trustItems — string[]
     case "CTA":
       return (
         <FinalCtaSection
           key={section.id}
-          headline={s(settings, "headline")}
-          subheadline={s(settings, "subheadline") || undefined}
+          headline={s(data, "headline")}
+          subheadline={s(data, "subheadline") || undefined}
           buttonLabel={
-            s(settings, "buttonLabel") || ctx.commerce?.ctaButtonLabel || "Kup teraz"
+            s(data, "buttonLabel") || ctx.commerce?.ctaButtonLabel || "Kup teraz"
           }
           checkoutUrl={ctx.checkoutUrl}
-          trustItems={arr<string>(settings, "trustItems")}
+          trustItems={arr<string>(data, "trustItems")}
           shellOverride={shellOverride}
         />
       );
@@ -331,7 +330,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
     //
     // The footer is now rendered by the chrome-level <Footer /> component in
     // the storefront layout (components/chrome/Footer.tsx). It uses branding,
-    // sectionRegistry, and legalPages — not this section's settings.
+    // sectionRegistry, and legalPages — not this section's data.
     //
     // Old configs may still include a FOOTER section. We keep the enum value
     // in the schema so those configs parse without error, but the renderer
@@ -340,8 +339,8 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
       return null;
 
     // ── UGC ──────────────────────────────────────────────────────────────────
-    // Canonical: settings.title, settings.description,
-    //            settings.items — UgcItem[]
+    // Canonical: data.title, data.description,
+    //            data.items — UgcItem[]
     case "UGC": {
       type UgcItm = {
         imageUrl?: string;
@@ -351,7 +350,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
         rating?: number;
         location?: string;
       };
-      const reviews = arr<UgcItm>(settings, "items")
+      const reviews = arr<UgcItm>(data, "items")
         .map((item, i) => ({
           id: `ugc-${i}`,
           media: {
@@ -368,63 +367,63 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
       return (
         <UgcSection
           key={section.id}
-          title={s(settings, "title")}
-          description={s(settings, "description") || undefined}
+          title={s(data, "title")}
+          description={s(data, "description") || undefined}
           reviews={reviews}
         />
       );
     }
 
     // ── EXPERT ───────────────────────────────────────────────────────────────
-    // Canonical: all fields in settings (no blocks ever used)
+    // Canonical: all fields in data
     case "EXPERT":
       return (
         <ExpertSection
           key={section.id}
-          title={s(settings, "title")}
-          description={s(settings, "description")}
-          expertName={s(settings, "expertName")}
-          expertRole={s(settings, "expertRole") || undefined}
-          expertImage={s(settings, "expertImage") || undefined}
-          videoUrl={s(settings, "videoUrl") || undefined}
-          quote={s(settings, "quote") || undefined}
+          title={s(data, "title")}
+          description={s(data, "description")}
+          expertName={s(data, "expertName")}
+          expertRole={s(data, "expertRole") || undefined}
+          expertImage={s(data, "expertImage") || undefined}
+          videoUrl={s(data, "videoUrl") || undefined}
+          quote={s(data, "quote") || undefined}
         />
       );
 
     // ── STORY ────────────────────────────────────────────────────────────────
-    // Canonical: settings.title, settings.description (intro),
-    //            settings.media (image URL),
-    //            settings.paragraphs — { heading?, body }[]
+    // Canonical: data.title, data.description (intro),
+    //            data.media (image URL),
+    //            data.paragraphs — { heading?, body }[]
     case "STORY": {
       type StoryPara = { heading?: string; body?: string };
-      const paragraphs = arr<StoryPara>(settings, "paragraphs")
+      const paragraphs = arr<StoryPara>(data, "paragraphs")
         .filter((p) => !!p.body)
         .map((p) => ({ heading: p.heading || undefined, body: p.body ?? "" }));
       return (
         <StorySection
           key={section.id}
-          title={s(settings, "title")}
-          intro={s(settings, "description") || undefined}
-          image={s(settings, "media") || undefined}
+          title={s(data, "title")}
+          intro={s(data, "description") || undefined}
+          image={s(data, "media") || undefined}
           paragraphs={paragraphs}
         />
       );
     }
 
     // ── RISK_REVERSAL ─────────────────────────────────────────────────────────
-    // Canonical: settings.title, settings.guaranteeText, settings.description,
-    //            settings.steps — string[]
+    // Canonical: data.title, data.guaranteeText, data.description,
+    //            data.steps — string[]
     case "RISK_REVERSAL": {
-      const steps = arr<string>(settings, "steps").map((title) => ({
+      const steps = arr<string>(data, "steps").map((title) => ({
         title,
         description: "",
       }));
       return (
         <RiskReversalSection
           key={section.id}
-          title={s(settings, "title")}
-          guaranteeText={s(settings, "guaranteeText")}
-          description={s(settings, "description")}
+          title={s(data, "title")}
+          guaranteeText={s(data, "guaranteeText")}
+          description={s(data, "description")}
           steps={steps}
         />
       );

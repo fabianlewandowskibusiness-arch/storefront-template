@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils/cn";
 // ── ShellOverride — phase-2 style meta keys ────────────────────────────────────
 //
 // Section components accept an optional `shellOverride` prop that maps directly
-// from the underscore-prefixed keys stored in `section.settings`:
+// from the underscore-prefixed keys stored in `section.data`:
 //   _backgroundStyle → backgroundStyle
 //   _paddingTop      → paddingTop
 //   _paddingBottom   → paddingBottom
@@ -77,7 +77,7 @@ interface SectionShellProps {
   className?: string;
   /** Section's own default background — used when no override is active. */
   background?: "default" | "surface" | "accent-soft";
-  /** Phase-2 style override — written by editor into section.settings._* keys. */
+  /** Phase-2 style override — written by editor into section.data._* keys. */
   override?: ShellOverride;
 }
 

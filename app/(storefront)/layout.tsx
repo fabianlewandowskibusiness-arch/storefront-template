@@ -16,7 +16,7 @@ function extractAnnouncementItems(config: StorefrontConfig): string[] {
   if (!home) return [];
   const ann = home.sections.find((s) => s.type === "ANNOUNCEMENT");
   if (!ann) return [];
-  const raw = ann.settings?.items;
+  const raw = ann.data?.items;
   if (!Array.isArray(raw)) return [];
   return raw
     .map((i: unknown) =>
@@ -35,12 +35,12 @@ function findHeroImage(config: StorefrontConfig): string | undefined {
   const home = config.pages.find((p) => p.type === "HOME") ?? config.pages[0];
   if (!home) return undefined;
   const hero = home.sections.find((s) => s.type === "HERO");
-  const gallery = hero?.settings?.gallery;
+  const gallery = hero?.data?.gallery;
   if (Array.isArray(gallery) && gallery.length > 0) {
     const first = gallery[0];
     if (typeof first === "string" && first.length > 0) return first;
   }
-  const image = hero?.settings?.image;
+  const image = hero?.data?.image;
   return typeof image === "string" && image.length > 0 ? image : undefined;
 }
 

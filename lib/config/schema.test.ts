@@ -244,7 +244,7 @@ describe("seo: null-tolerance", () => {
 // ── Section null-tolerance ────────────────────────────────────────────────────
 
 describe("sections: null-tolerance", () => {
-  it("null section settings is accepted — treated as empty settings", () => {
+  it("null section data is accepted — treated as empty data", () => {
     const config = parseOk(minimalConfig({
       pages: [{
         type: "HOME", title: "Home", slug: "/",
@@ -252,12 +252,12 @@ describe("sections: null-tolerance", () => {
           id:       "hero-1",
           type:     "HERO",
           position: 1,
-          settings: null,
-          blocks:   [],
+          data:     null,
+
         }],
       }],
     }));
-    expect(config.pages[0].sections[0].settings).toBeNull();
+    expect(config.pages[0].sections[0].data).toBeNull();
   });
 
   it("null section position is coerced to 0", () => {
@@ -268,41 +268,14 @@ describe("sections: null-tolerance", () => {
           id:       "trust-1",
           type:     "TRUST_BAR",
           position: null,
-          settings: {},
-          blocks:   [],
+          data:     {},
+
         }],
       }],
     }));
     expect(config.pages[0].sections[0].position).toBe(0);
   });
 
-  it("null block settings is accepted", () => {
-    const config = parseOk(minimalConfig({
-      pages: [{
-        type: "HOME", title: "Home", slug: "/",
-        sections: [{
-          id:       "hero-1",
-          type:     "HERO",
-          position: 1,
-          settings: {},
-          blocks: [
-            { id: "bullet-1", type: "benefit_bullet", settings: null },
-          ],
-        }],
-      }],
-    }));
-    expect(config.pages[0].sections[0].blocks[0].settings).toBeNull();
-  });
-
-  it("absent blocks array defaults to []", () => {
-    const config = parseOk(minimalConfig({
-      pages: [{
-        type: "HOME", title: "Home", slug: "/",
-        sections: [{ id: "h1", type: "HERO", position: 0, settings: {} }],
-      }],
-    }));
-    expect(config.pages[0].sections[0].blocks).toEqual([]);
-  });
 });
 
 // ── Page null-tolerance ───────────────────────────────────────────────────────
@@ -385,7 +358,7 @@ describe("backward compatibility", () => {
     expect(config.analytics.enabled).toBe(true);
   });
 
-  it("legacy heroVariant key in section settings passes through validation", () => {
+  it("legacy heroVariant key in section data passes through validation", () => {
     // Old configs stored heroVariant before _sectionVariant was introduced
     const config = parseOk(minimalConfig({
       pages: [{
@@ -394,29 +367,29 @@ describe("backward compatibility", () => {
           id:       "hero-1",
           type:     "HERO",
           position: 1,
-          settings: { heroVariant: "split-image", headline: "Buy now" },
-          blocks:   [],
+          data:     { heroVariant: "split-image", headline: "Buy now" },
+
         }],
       }],
     }));
-    // settings are generic Record<string, unknown> — any key is preserved
-    expect(config.pages[0].sections[0].settings?.["heroVariant"]).toBe("split-image");
-    expect(config.pages[0].sections[0].settings?.["headline"]).toBe("Buy now");
+    // data is generic Record<string, unknown> — any key is preserved
+    expect(config.pages[0].sections[0].data?.["heroVariant"]).toBe("split-image");
+    expect(config.pages[0].sections[0].data?.["headline"]).toBe("Buy now");
   });
 
-  it("media image URL in section settings is preserved unchanged by schema", () => {
+  it("media image URL in section data is preserved unchanged by schema", () => {
     const imageUrl = "https://api.example.com/api/storefront/media/abc-123";
     const config = parseOk(minimalConfig({
       pages: [{
         type: "HOME", title: "Home", slug: "/",
         sections: [{
           id: "hero-1", type: "HERO", position: 1,
-          settings: { image: imageUrl },
-          blocks: [],
+          data: { image: imageUrl },
+
         }],
       }],
     }));
-    expect(config.pages[0].sections[0].settings?.["image"]).toBe(imageUrl);
+    expect(config.pages[0].sections[0].data?.["image"]).toBe(imageUrl);
   });
 });
 
@@ -460,7 +433,7 @@ describe("broken critical structure: still rejected", () => {
       pages: [{
         type: "HOME", title: "Home", slug: "/",
         sections: [{
-          id: "s1", type: "INVALID_SECTION_TYPE", position: 0, settings: {}, blocks: [],
+          id: "s1", type: "INVALID_SECTION_TYPE", position: 0, data: {},
         }],
       }],
     }));
@@ -501,7 +474,7 @@ describe("broken critical structure: still rejected", () => {
 
 // ── ANNOUNCEMENT section (canonical type) ────────────────────────────────────
 
-describe("ANNOUNCEMENT section: canonical type and settings", () => {
+describe("ANNOUNCEMENT section: canonical type and data", () => {
   it("parses a valid ANNOUNCEMENT section with items", () => {
     const config = parseOk(minimalConfig({
       pages: [{
@@ -510,7 +483,7 @@ describe("ANNOUNCEMENT section: canonical type and settings", () => {
           id: "ann-1",
           type: "ANNOUNCEMENT",
           position: 0,
-          settings: {
+          data: {
             items: [
               { text: "Darmowa wysyłka od 149 zł", icon: "🚀", emphasis: "ACCENT" },
               { text: "30-dniowy zwrot bez pytań", icon: "✅" },
@@ -518,21 +491,21 @@ describe("ANNOUNCEMENT section: canonical type and settings", () => {
             speed: 40,
             pauseOnHover: true,
           },
-          blocks: [],
+
         }],
       }],
     }));
     const section = config.pages[0].sections[0];
     expect(section.type).toBe("ANNOUNCEMENT");
-    expect(section.settings?.["items"]).toHaveLength(2);
-    expect((section.settings?.["items"] as unknown[])[0]).toMatchObject({
+    expect(section.data?.["items"]).toHaveLength(2);
+    expect((section.data?.["items"] as unknown[])[0]).toMatchObject({
       text: "Darmowa wysyłka od 149 zł",
       icon: "🚀",
       emphasis: "ACCENT",
     });
   });
 
-  it("ANNOUNCEMENT section with null settings is accepted", () => {
+  it("ANNOUNCEMENT section with null data is accepted", () => {
     const config = parseOk(minimalConfig({
       pages: [{
         type: "HOME", title: "Home", slug: "/",
@@ -540,12 +513,12 @@ describe("ANNOUNCEMENT section: canonical type and settings", () => {
           id: "ann-1",
           type: "ANNOUNCEMENT",
           position: 0,
-          settings: null,
-          blocks: [],
+          data: null,
+
         }],
       }],
     }));
-    expect(config.pages[0].sections[0].settings).toBeNull();
+    expect(config.pages[0].sections[0].data).toBeNull();
   });
 
   it("ANNOUNCEMENT section with empty items array is accepted by schema", () => {
@@ -557,8 +530,8 @@ describe("ANNOUNCEMENT section: canonical type and settings", () => {
           id: "ann-1",
           type: "ANNOUNCEMENT",
           position: 0,
-          settings: { items: [] },
-          blocks: [],
+          data: { items: [] },
+
         }],
       }],
     }));
@@ -569,7 +542,7 @@ describe("ANNOUNCEMENT section: canonical type and settings", () => {
 // ── Hero v2 commerce fields ───────────────────────────────────────────────────
 
 describe("hero: v2 commerce fields (socialProof, stickyBuyBar, trustItems)", () => {
-  it("hero with v2 socialProof block is preserved in settings", () => {
+  it("hero with v2 socialProof block is preserved in data", () => {
     const config = parseOk(minimalConfig({
       pages: [{
         type: "HOME", title: "Home", slug: "/",
@@ -577,7 +550,7 @@ describe("hero: v2 commerce fields (socialProof, stickyBuyBar, trustItems)", () 
           id: "hero-1",
           type: "HERO",
           position: 0,
-          settings: {
+          data: {
             headline: "Śpisz źle od tygodni?",
             socialProof: {
               averageRating: 4.8,
@@ -586,18 +559,18 @@ describe("hero: v2 commerce fields (socialProof, stickyBuyBar, trustItems)", () 
               viewersNowText: "12 osób ogląda teraz",
             },
           },
-          blocks: [],
+
         }],
       }],
     }));
-    const settings = config.pages[0].sections[0].settings as Record<string, unknown>;
-    expect(settings?.["socialProof"]).toMatchObject({
+    const data = config.pages[0].sections[0].data as Record<string, unknown>;
+    expect(data?.["socialProof"]).toMatchObject({
       averageRating: 4.8,
       reviewCount: 1240,
     });
   });
 
-  it("hero with stickyBuyBar config is preserved in settings", () => {
+  it("hero with stickyBuyBar config is preserved in data", () => {
     const config = parseOk(minimalConfig({
       pages: [{
         type: "HOME", title: "Home", slug: "/",
@@ -605,7 +578,7 @@ describe("hero: v2 commerce fields (socialProof, stickyBuyBar, trustItems)", () 
           id: "hero-1",
           type: "HERO",
           position: 0,
-          settings: {
+          data: {
             headline: "SleepWell",
             stickyBuyBar: {
               enabled: true,
@@ -615,18 +588,18 @@ describe("hero: v2 commerce fields (socialProof, stickyBuyBar, trustItems)", () 
               showAfterHero: true,
             },
           },
-          blocks: [],
+
         }],
       }],
     }));
-    const settings = config.pages[0].sections[0].settings as Record<string, unknown>;
-    expect(settings?.["stickyBuyBar"]).toMatchObject({
+    const data = config.pages[0].sections[0].data as Record<string, unknown>;
+    expect(data?.["stickyBuyBar"]).toMatchObject({
       enabled: true,
       mobileOnly: false,
     });
   });
 
-  it("hero with trustItems array is preserved in settings", () => {
+  it("hero with trustItems array is preserved in data", () => {
     const config = parseOk(minimalConfig({
       pages: [{
         type: "HOME", title: "Home", slug: "/",
@@ -634,7 +607,7 @@ describe("hero: v2 commerce fields (socialProof, stickyBuyBar, trustItems)", () 
           id: "hero-1",
           type: "HERO",
           position: 0,
-          settings: {
+          data: {
             headline: "SleepWell",
             trustItems: [
               { icon: "🔒", text: "SSL" },
@@ -642,13 +615,13 @@ describe("hero: v2 commerce fields (socialProof, stickyBuyBar, trustItems)", () 
             ],
             paymentMethods: ["BLIK", "Przelewy24", "Apple Pay"],
           },
-          blocks: [],
+
         }],
       }],
     }));
-    const settings = config.pages[0].sections[0].settings as Record<string, unknown>;
-    expect(settings?.["trustItems"]).toHaveLength(2);
-    expect(settings?.["paymentMethods"]).toContain("BLIK");
+    const data = config.pages[0].sections[0].data as Record<string, unknown>;
+    expect(data?.["trustItems"]).toHaveLength(2);
+    expect(data?.["paymentMethods"]).toContain("BLIK");
   });
 
   it("hero with v2 packageOption fields (isDefault, stockHint) is preserved", () => {
@@ -659,7 +632,7 @@ describe("hero: v2 commerce fields (socialProof, stickyBuyBar, trustItems)", () 
           id: "hero-1",
           type: "HERO",
           position: 0,
-          settings: {
+          data: {
             headline: "SleepWell",
             packages: [
               {
@@ -675,12 +648,12 @@ describe("hero: v2 commerce fields (socialProof, stickyBuyBar, trustItems)", () 
               },
             ],
           },
-          blocks: [],
+
         }],
       }],
     }));
-    const settings = config.pages[0].sections[0].settings as Record<string, unknown>;
-    const packages = settings?.["packages"] as unknown[];
+    const data = config.pages[0].sections[0].data as Record<string, unknown>;
+    const packages = data?.["packages"] as unknown[];
     expect(packages?.[0]).toMatchObject({
       isDefault: true,
       stockHint: "Ostatnie 12 sztuk",
@@ -688,7 +661,7 @@ describe("hero: v2 commerce fields (socialProof, stickyBuyBar, trustItems)", () 
     });
   });
 
-  it("null stickyBuyBar is accepted in settings", () => {
+  it("null stickyBuyBar is accepted in data", () => {
     const config = parseOk(minimalConfig({
       pages: [{
         type: "HOME", title: "Home", slug: "/",
@@ -696,13 +669,13 @@ describe("hero: v2 commerce fields (socialProof, stickyBuyBar, trustItems)", () 
           id: "hero-1",
           type: "HERO",
           position: 0,
-          settings: { headline: "Title", stickyBuyBar: null },
-          blocks: [],
+          data: { headline: "Title", stickyBuyBar: null },
+
         }],
       }],
     }));
-    const settings = config.pages[0].sections[0].settings as Record<string, unknown>;
-    expect(settings?.["stickyBuyBar"]).toBeNull();
+    const data = config.pages[0].sections[0].data as Record<string, unknown>;
+    expect(data?.["stickyBuyBar"]).toBeNull();
   });
 });
 
@@ -717,7 +690,7 @@ describe("UGC section: rich items (v2 format)", () => {
           id: "ugc-1",
           type: "UGC",
           position: 3,
-          settings: {
+          data: {
             title: "Co mówią nasi klienci",
             items: [
               {
@@ -742,20 +715,20 @@ describe("UGC section: rich items (v2 format)", () => {
               },
             ],
           },
-          blocks: [],
+
         }],
       }],
     }));
-    const settings = config.pages[0].sections[0].settings as Record<string, unknown>;
-    expect(settings?.["items"]).toHaveLength(3);
-    expect((settings?.["items"] as unknown[])[0]).toMatchObject({
+    const data = config.pages[0].sections[0].data as Record<string, unknown>;
+    expect(data?.["items"]).toHaveLength(3);
+    expect((data?.["items"] as unknown[])[0]).toMatchObject({
       authorName: "Anna K.",
       featured: true,
       location: "Warszawa",
     });
   });
 
-  it("UGC section without items[] (empty settings) is accepted by schema", () => {
+  it("UGC section without items[] (empty data) is accepted by schema", () => {
     // Schema accepts a UGC section with no items — the Java validator enforces minimum count.
     // The renderer skips items with no media URL or caption; an empty UGC renders nothing.
     const config = parseOk(minimalConfig({
@@ -765,14 +738,14 @@ describe("UGC section: rich items (v2 format)", () => {
           id: "ugc-1",
           type: "UGC",
           position: 3,
-          settings: { title: "Co mówią klienci" },
-          blocks: [],
+          data: { title: "Co mówią klienci" },
+
         }],
       }],
     }));
-    const settings = config.pages[0].sections[0].settings as Record<string, unknown>;
-    expect(settings?.["title"]).toBe("Co mówią klienci");
-    expect(settings?.["items"]).toBeUndefined();
+    const data = config.pages[0].sections[0].data as Record<string, unknown>;
+    expect(data?.["title"]).toBe("Co mówią klienci");
+    expect(data?.["items"]).toBeUndefined();
   });
 
   it("UGC item with null optional fields is preserved", () => {
@@ -783,16 +756,16 @@ describe("UGC section: rich items (v2 format)", () => {
           id: "ugc-1",
           type: "UGC",
           position: 3,
-          settings: {
+          data: {
             items: [
               { imageUrl: "https://example.com/img.jpg", videoUrl: null, featured: null, rating: null },
             ],
           },
-          blocks: [],
+
         }],
       }],
     }));
-    const items = (config.pages[0].sections[0].settings as Record<string, unknown>)?.["items"] as unknown[];
+    const items = (config.pages[0].sections[0].data as Record<string, unknown>)?.["items"] as unknown[];
     expect((items[0] as Record<string, unknown>)["videoUrl"]).toBeNull();
     expect((items[0] as Record<string, unknown>)["featured"]).toBeNull();
   });
@@ -809,7 +782,7 @@ describe("testimonials: rich v2 fields", () => {
           id: "ts-1",
           type: "TESTIMONIALS",
           position: 4,
-          settings: {
+          data: {
             title: "Opinie naszych klientów",
             testimonials: [
               {
@@ -827,11 +800,11 @@ describe("testimonials: rich v2 fields", () => {
               },
             ],
           },
-          blocks: [],
+
         }],
       }],
     }));
-    const testimonials = (config.pages[0].sections[0].settings as Record<string, unknown>)
+    const testimonials = (config.pages[0].sections[0].data as Record<string, unknown>)
       ?.["testimonials"] as unknown[];
     expect(testimonials).toHaveLength(1);
     expect(testimonials[0]).toMatchObject({
@@ -844,7 +817,7 @@ describe("testimonials: rich v2 fields", () => {
     });
   });
 
-  it("testimonial with quoteShort and quoteLong — both are preserved in settings", () => {
+  it("testimonial with quoteShort and quoteLong — both are preserved in data", () => {
     // Canonical v2 format: quoteShort for compact cards, quoteLong for expanded view.
     // The renderer prefers quoteShort and falls back to quoteLong.
     const config = parseOk(minimalConfig({
@@ -854,7 +827,7 @@ describe("testimonials: rich v2 fields", () => {
           id: "ts-1",
           type: "TESTIMONIALS",
           position: 4,
-          settings: {
+          data: {
             testimonials: [
               {
                 authorName: "Anna K.",
@@ -864,18 +837,18 @@ describe("testimonials: rich v2 fields", () => {
               },
             ],
           },
-          blocks: [],
+
         }],
       }],
     }));
-    const t = ((config.pages[0].sections[0].settings as Record<string, unknown>)
+    const t = ((config.pages[0].sections[0].data as Record<string, unknown>)
       ?.["testimonials"] as unknown[])[0] as Record<string, unknown>;
     expect(t["quoteShort"]).toBe("Najlepszy produkt na rynku");
     expect(t["quoteLong"]).toContain("3 miesięcy");
     expect(t["text"]).toBeUndefined();
   });
 
-  it("null rich testimonial fields are preserved as-is in settings", () => {
+  it("null rich testimonial fields are preserved as-is in data", () => {
     const config = parseOk(minimalConfig({
       pages: [{
         type: "HOME", title: "Home", slug: "/",
@@ -883,7 +856,7 @@ describe("testimonials: rich v2 fields", () => {
           id: "ts-1",
           type: "TESTIMONIALS",
           position: 4,
-          settings: {
+          data: {
             testimonials: [
               {
                 authorName: "Jan K.",
@@ -895,25 +868,25 @@ describe("testimonials: rich v2 fields", () => {
               },
             ],
           },
-          blocks: [],
+
         }],
       }],
     }));
-    const t = ((config.pages[0].sections[0].settings as Record<string, unknown>)
+    const t = ((config.pages[0].sections[0].data as Record<string, unknown>)
       ?.["testimonials"] as unknown[])[0] as Record<string, unknown>;
     expect(t["verifiedPurchase"]).toBeNull();
     expect(t["imageUrl"]).toBeNull();
   });
 });
 
-// ── Backward compatibility: preserved settings keys ───────────────────────────
+// ── Backward compatibility: preserved data keys ──────────────────────────────
 //
-// The Zod schema stores section settings as opaque Record<string, unknown>.
-// Any key present in settings is preserved unchanged — the schema does not
-// validate settings contents. This block tests schema-level passthrough only.
+// The Zod schema stores section data as opaque Record<string, unknown>.
+// Any key present in data is preserved unchanged — the schema does not
+// validate data contents. This block tests schema-level passthrough only.
 // The renderer is the layer that decides which keys to read.
 
-describe("settings passthrough: unknown keys are preserved unchanged", () => {
+describe("data passthrough: unknown keys are preserved unchanged", () => {
   it("hero with trustBadge/deliveryInfo/paymentInfo (legacy display hints) parses correctly", () => {
     // trustBadge/deliveryInfo/paymentInfo are still rendered by HeroSection.
     // They coexist alongside the canonical trustItems[] array.
@@ -924,26 +897,26 @@ describe("settings passthrough: unknown keys are preserved unchanged", () => {
           id: "hero-1",
           type: "HERO",
           position: 0,
-          settings: {
+          data: {
             headline: "Buy SleepWell",
             trustBadge: "Certyfikat GMP",
             deliveryInfo: "Wysyłka w 24h",
             paymentInfo: "BLIK, karta",
             packages: [{ name: "1 szt", quantity: 1, price: 89 }],
           },
-          blocks: [],
+
         }],
       }],
     }));
-    const settings = config.pages[0].sections[0].settings as Record<string, unknown>;
-    expect(settings?.["trustBadge"]).toBe("Certyfikat GMP");
-    expect(settings?.["trustItems"]).toBeUndefined();
-    expect(settings?.["stickyBuyBar"]).toBeUndefined();
+    const data = config.pages[0].sections[0].data as Record<string, unknown>;
+    expect(data?.["trustBadge"]).toBe("Certyfikat GMP");
+    expect(data?.["trustItems"]).toBeUndefined();
+    expect(data?.["stickyBuyBar"]).toBeUndefined();
   });
 
-  it("schema treats settings as opaque — arbitrary extra keys pass through", () => {
-    // Section settings are Record<string, unknown>: the schema never rejects
-    // unknown keys inside settings. Only the section type enum is validated.
+  it("schema treats data as opaque — arbitrary extra keys pass through", () => {
+    // Section data is Record<string, unknown>: the schema never rejects
+    // unknown keys inside data. Only the section type enum is validated.
     const config = parseOk(minimalConfig({
       pages: [{
         type: "HOME", title: "Home", slug: "/",
@@ -951,20 +924,20 @@ describe("settings passthrough: unknown keys are preserved unchanged", () => {
           id: "hero-1",
           type: "HERO",
           position: 0,
-          settings: {
+          data: {
             headline: "Test",
             someObsoleteKey: "value",
             anotherKey: 42,
             nestedObject: { a: 1, b: [1, 2, 3] },
           },
-          blocks: [],
+
         }],
       }],
     }));
-    const settings = config.pages[0].sections[0].settings as Record<string, unknown>;
-    expect(settings?.["someObsoleteKey"]).toBe("value");
-    expect(settings?.["anotherKey"]).toBe(42);
-    expect(settings?.["nestedObject"]).toMatchObject({ a: 1 });
+    const data = config.pages[0].sections[0].data as Record<string, unknown>;
+    expect(data?.["someObsoleteKey"]).toBe("value");
+    expect(data?.["anotherKey"]).toBe(42);
+    expect(data?.["nestedObject"]).toMatchObject({ a: 1 });
   });
 });
 
@@ -990,22 +963,22 @@ describe("canonical full config: all section types parse without errors", () => 
         title: "Home",
         slug: "/",
         sections: [
-          { id: "s1",  type: "ANNOUNCEMENT",   position: 0,  settings: { items: [{ text: "Darmowa wysyłka!" }] }, blocks: [] },
-          { id: "s2",  type: "HERO",            position: 1,  settings: { headline: "Śpisz źle?" }, blocks: [] },
-          { id: "s3",  type: "TRUST_BAR",       position: 2,  settings: { items: ["Certyfikat GMP", "30-dniowy zwrot"] }, blocks: [] },
-          { id: "s4",  type: "BENEFITS",        position: 3,  settings: { items: [{ title: "Lepszy sen", description: "..." }] }, blocks: [] },
-          { id: "s5",  type: "PROBLEM",         position: 4,  settings: { items: [{ title: "Bezsenność", description: "..." }] }, blocks: [] },
-          { id: "s6",  type: "FEATURES",        position: 5,  settings: { items: [{ name: "Melatonina", description: "..." }] }, blocks: [] },
-          { id: "s7",  type: "COMPARISON",      position: 6,  settings: { rows: [{ feature: "Cena", productValue: "89 zł", competitorValue: "120 zł" }] }, blocks: [] },
-          { id: "s8",  type: "TESTIMONIALS",    position: 7,  settings: { testimonials: [{ authorName: "Anna", quoteShort: "Super!", rating: 5 }] }, blocks: [] },
-          { id: "s9",  type: "UGC",             position: 8,  settings: { items: [{ imageUrl: "https://example.com/img.jpg", caption: "Polecam!", authorName: "Kasia" }] }, blocks: [] },
-          { id: "s10", type: "EXPERT",          position: 9,  settings: { expertName: "Dr. Kowalski", title: "Opinia eksperta" }, blocks: [] },
-          { id: "s11", type: "STORY",           position: 10, settings: { title: "Nasza historia", paragraphs: [{ body: "Zaczęło się od..." }] }, blocks: [] },
-          { id: "s12", type: "RISK_REVERSAL",   position: 11, settings: { title: "30-dniowa gwarancja", steps: ["Kup", "Przetestuj", "Zwróć"] }, blocks: [] },
-          { id: "s13", type: "OFFER",           position: 12, settings: { title: "Oferta", price: 89, compareAtPrice: 149, included: ["Darmowa wysyłka"] }, blocks: [] },
-          { id: "s14", type: "FAQ",             position: 13, settings: { items: [{ question: "Jak działa?", answer: "Poprzez..." }] }, blocks: [] },
-          { id: "s15", type: "CTA",             position: 14, settings: { headline: "Zacznij dziś", trustItems: ["SSL", "30-dniowy zwrot"] }, blocks: [] },
-          { id: "s16", type: "FOOTER",          position: 15, settings: { contactEmail: "info@sklep.pl", links: [{ label: "Polityka", href: "/polityka" }] }, blocks: [] },
+          { id: "s1",  type: "ANNOUNCEMENT",   position: 0,  data: { items: [{ text: "Darmowa wysyłka!" }] } },
+          { id: "s2",  type: "HERO",            position: 1,  data: { headline: "Śpisz źle?" } },
+          { id: "s3",  type: "TRUST_BAR",       position: 2,  data: { items: ["Certyfikat GMP", "30-dniowy zwrot"] } },
+          { id: "s4",  type: "BENEFITS",        position: 3,  data: { items: [{ title: "Lepszy sen", description: "..." }] } },
+          { id: "s5",  type: "PROBLEM",         position: 4,  data: { items: [{ title: "Bezsenność", description: "..." }] } },
+          { id: "s6",  type: "FEATURES",        position: 5,  data: { items: [{ name: "Melatonina", description: "..." }] } },
+          { id: "s7",  type: "COMPARISON",      position: 6,  data: { rows: [{ feature: "Cena", productValue: "89 zł", competitorValue: "120 zł" }] } },
+          { id: "s8",  type: "TESTIMONIALS",    position: 7,  data: { testimonials: [{ authorName: "Anna", quoteShort: "Super!", rating: 5 }] } },
+          { id: "s9",  type: "UGC",             position: 8,  data: { items: [{ imageUrl: "https://example.com/img.jpg", caption: "Polecam!", authorName: "Kasia" }] } },
+          { id: "s10", type: "EXPERT",          position: 9,  data: { expertName: "Dr. Kowalski", title: "Opinia eksperta" } },
+          { id: "s11", type: "STORY",           position: 10, data: { title: "Nasza historia", paragraphs: [{ body: "Zaczęło się od..." }] } },
+          { id: "s12", type: "RISK_REVERSAL",   position: 11, data: { title: "30-dniowa gwarancja", steps: ["Kup", "Przetestuj", "Zwróć"] } },
+          { id: "s13", type: "OFFER",           position: 12, data: { title: "Oferta", price: 89, compareAtPrice: 149, included: ["Darmowa wysyłka"] } },
+          { id: "s14", type: "FAQ",             position: 13, data: { items: [{ question: "Jak działa?", answer: "Poprzez..." }] } },
+          { id: "s15", type: "CTA",             position: 14, data: { headline: "Zacznij dziś", trustItems: ["SSL", "30-dniowy zwrot"] } },
+          { id: "s16", type: "FOOTER",          position: 15, data: { contactEmail: "info@sklep.pl", links: [{ label: "Polityka", href: "/polityka" }] } },
         ],
       }],
     });
@@ -1072,7 +1045,7 @@ describe("integration: canonical backend payload → storefront schema → no sh
             id: "ann-1",
             type: "ANNOUNCEMENT",
             position: 0,
-            settings: {
+            data: {
               items: [
                 { text: "Darmowa wysyłka od 149 zł", icon: "🚀", emphasis: "ACCENT" },
                 { text: "30-dniowy zwrot bez pytań",  icon: "✅" },
@@ -1080,13 +1053,13 @@ describe("integration: canonical backend payload → storefront schema → no sh
               speed: 40,
               pauseOnHover: true,
             },
-            blocks: [],
+  
           },
           {
             id: "hero-1",
             type: "HERO",
             position: 1,
-            settings: {
+            data: {
               headline: "Śpisz źle od tygodni?",
               subheadline: "SleepWell Pro — suplement wspierający zdrowy sen",
               description: "Naturalna formuła z melatoniną, magnezem i ashwagandą.",
@@ -1143,13 +1116,13 @@ describe("integration: canonical backend payload → storefront schema → no sh
                 ctaLabelOverride: "Zamów teraz",
               },
             },
-            blocks: [],
+  
           },
           {
             id: "ugc-1",
             type: "UGC",
             position: 2,
-            settings: {
+            data: {
               title: "Co mówią nasi klienci",
               items: [
                 {
@@ -1174,13 +1147,13 @@ describe("integration: canonical backend payload → storefront schema → no sh
                 },
               ],
             },
-            blocks: [],
+  
           },
           {
             id: "ts-1",
             type: "TESTIMONIALS",
             position: 3,
-            settings: {
+            data: {
               title: "Opinie naszych klientów",
               testimonials: [
                 {
@@ -1198,7 +1171,7 @@ describe("integration: canonical backend payload → storefront schema → no sh
                 },
               ],
             },
-            blocks: [],
+  
           },
         ],
       }],
@@ -1220,12 +1193,12 @@ describe("integration: canonical backend payload → storefront schema → no sh
     // ANNOUNCEMENT section
     const ann = sections[0];
     expect(ann.type).toBe("ANNOUNCEMENT");
-    expect((ann.settings?.["items"] as unknown[]).length).toBe(2);
+    expect((ann.data?.["items"] as unknown[]).length).toBe(2);
 
     // HERO section — socialProof, packages, stickyBuyBar
     const hero = sections[1];
     expect(hero.type).toBe("HERO");
-    const hs = hero.settings as Record<string, unknown>;
+    const hs = hero.data as Record<string, unknown>;
     expect((hs["socialProof"] as Record<string, unknown>)["averageRating"]).toBe(4.8);
     expect((hs["socialProof"] as Record<string, unknown>)["reviewCount"]).toBe(1240);
     expect((hs["gallery"] as string[])).toHaveLength(2);
@@ -1239,7 +1212,7 @@ describe("integration: canonical backend payload → storefront schema → no sh
     // UGC section — rich items[]
     const ugc = sections[2];
     expect(ugc.type).toBe("UGC");
-    const ugcItems = ugc.settings?.["items"] as unknown[];
+    const ugcItems = ugc.data?.["items"] as unknown[];
     expect(ugcItems).toHaveLength(3);
     expect((ugcItems[0] as Record<string, unknown>)["featured"]).toBe(true);
     expect((ugcItems[1] as Record<string, unknown>)["videoUrl"]).toBe("https://youtube.com/embed/abc123");
@@ -1247,7 +1220,7 @@ describe("integration: canonical backend payload → storefront schema → no sh
     // TESTIMONIALS section — quoteShort/quoteLong/rich fields
     const ts = sections[3];
     expect(ts.type).toBe("TESTIMONIALS");
-    const testimonials = ts.settings?.["testimonials"] as Record<string, unknown>[];
+    const testimonials = ts.data?.["testimonials"] as Record<string, unknown>[];
     expect(testimonials).toHaveLength(1);
     expect(testimonials[0]["quoteShort"]).toBe("Rewelacyjny efekt już po tygodniu");
     expect(testimonials[0]["improvementTimeframe"]).toBe("Po 2 tygodniach");
