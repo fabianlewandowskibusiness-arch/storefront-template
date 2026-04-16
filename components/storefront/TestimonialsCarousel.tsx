@@ -119,6 +119,11 @@ export default function TestimonialsCarousel({
               }`}
             >
               <div className="flex items-center gap-4 mb-4">
+                {/* Missing-media fallback: `item.avatar` maps to the canonical
+                    `testimonials[].avatarUrl` field, which may be `null` per
+                    the storefront media contract (see lib/storefront/mediaFields.ts).
+                    When absent we render an initial-letter circle using the
+                    author's name — same accent-soft tokens as the avatar slot. */}
                 {item.avatar ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
@@ -127,8 +132,11 @@ export default function TestimonialsCarousel({
                     className="w-14 h-14 rounded-full object-cover bg-[var(--color-accent-soft)]"
                   />
                 ) : (
-                  <div className="w-14 h-14 rounded-full bg-[var(--color-accent-soft)] flex items-center justify-center text-[var(--color-accent)] font-bold text-lg">
-                    {item.name.charAt(0)}
+                  <div
+                    aria-hidden="true"
+                    className="w-14 h-14 rounded-full bg-[var(--color-accent-soft)] flex items-center justify-center text-[var(--color-accent)] font-bold text-lg"
+                  >
+                    {item.name.charAt(0).toUpperCase() || "?"}
                   </div>
                 )}
                 <div className="flex-1 min-w-0">

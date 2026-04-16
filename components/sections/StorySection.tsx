@@ -14,15 +14,22 @@ interface StorySectionProps {
 }
 
 export default function StorySection({ title, intro, image, paragraphs }: StorySectionProps) {
+  // Missing-media fallback: `image` maps to the canonical `media` field, which
+  // may be `null` per the storefront media contract (see lib/storefront/mediaFields.ts).
+  // When it is absent we deliberately collapse to a single centered column so
+  // the narrative reads cleanly on its own — this is an intentional empty
+  // state, not an accidental layout side effect.
+  const hasImage = !!image;
+
   return (
     <SectionShell background="surface">
       <Container>
         <div
           className={`grid gap-10 items-start ${
-            image ? "grid-cols-1 lg:grid-cols-[1fr_1.2fr]" : "grid-cols-1"
+            hasImage ? "grid-cols-1 lg:grid-cols-[1fr_1.2fr]" : "grid-cols-1"
           }`}
         >
-          {image && (
+          {hasImage && (
             <div className="lg:sticky lg:top-8">
               <div className="aspect-[4/5] rounded-[var(--radius)] overflow-hidden bg-[var(--color-background)] shadow-lg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -31,7 +38,7 @@ export default function StorySection({ title, intro, image, paragraphs }: StoryS
             </div>
           )}
 
-          <div className={image ? "" : "max-w-3xl mx-auto"}>
+          <div className={hasImage ? "" : "max-w-3xl mx-auto"}>
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--color-text)] leading-tight mb-5">
               {title}
             </h2>

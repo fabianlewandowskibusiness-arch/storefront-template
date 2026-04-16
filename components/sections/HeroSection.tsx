@@ -102,8 +102,17 @@ export default function HeroSection({
         <Container>
           <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-8 lg:gap-12">
             {/* ─── LEFT: gallery ─── */}
+            {/* Missing-media fallback: when `gallery` is `[]` (canonical
+                contract for "no gallery media"), ImageGallery renders
+                nothing. We render a neutral branded placeholder in that
+                slot so the two-column layout stays intact and the buy
+                box does not look orphaned. See lib/storefront/mediaFields.ts. */}
             <div className="lg:sticky lg:top-6 lg:self-start">
-              <ImageGallery items={gallery} productName={productName} />
+              {gallery.length > 0 ? (
+                <ImageGallery items={gallery} productName={productName} />
+              ) : (
+                <HeroGalleryPlaceholder productName={productName} />
+              )}
             </div>
 
             {/* ─── RIGHT: buy box ─── */}
@@ -291,5 +300,46 @@ export default function HeroSection({
         />
       )}
     </>
+  );
+}
+
+// ── Missing-media fallback ────────────────────────────────────────────────────
+//
+// Rendered in the gallery slot when `section.data.gallery` is `[]`. Uses the
+// storefront's visual language (accent-soft gradient, --radius, --color-border)
+// so the empty state reads as a deliberate "photo coming" frame rather than a
+// broken layout. Contains no data — this is presentation only.
+
+function HeroGalleryPlaceholder({ productName }: { productName: string }) {
+  return (
+    <div
+      role="img"
+      aria-label={`${productName} — zdjęcie wkrótce`}
+      className="w-full aspect-square rounded-[var(--radius)] bg-gradient-to-br from-[var(--color-surface)] to-[var(--color-accent-soft)] border border-[var(--color-border)] flex flex-col items-center justify-center gap-3 text-[var(--color-text-muted)]"
+    >
+      <svg
+        className="w-14 h-14 opacity-40"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.25}
+        aria-hidden="true"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z"
+        />
+        <circle cx="9" cy="10" r="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M21 16l-5.5-5.5a1 1 0 0 0-1.4 0L3 22"
+        />
+      </svg>
+      <p className="text-xs font-medium uppercase tracking-wide">
+        Zdjęcie wkrótce
+      </p>
+    </div>
   );
 }

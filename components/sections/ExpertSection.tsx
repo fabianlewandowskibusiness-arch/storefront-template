@@ -24,7 +24,11 @@ export default function ExpertSection({
     <SectionShell>
       <Container>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-          {/* Video / image — prefer video, fall back to expert portrait */}
+          {/* Video / image — prefer video, fall back to expert portrait.
+              Missing-media fallback: when both `videoUrl` and `expertImage`
+              are absent (canonical contract allows `expertImage` to be
+              `null`), we render a branded initials placeholder so the
+              two-column grid stays balanced. See lib/storefront/mediaFields.ts. */}
           <div className="order-2 lg:order-1">
             {videoUrl ? (
               <div className="aspect-video rounded-[var(--radius)] overflow-hidden bg-black shadow-lg">
@@ -45,7 +49,9 @@ export default function ExpertSection({
                   className="w-full h-full object-cover"
                 />
               </div>
-            ) : null}
+            ) : (
+              <ExpertPortraitPlaceholder name={expertName} />
+            )}
           </div>
 
           {/* Content */}
@@ -66,15 +72,20 @@ export default function ExpertSection({
               </blockquote>
             )}
 
-            {/* Expert byline */}
+            {/* Expert byline.
+                Missing-media fallback: if `expertImage` is `null`, we render
+                an initial-letter circle to keep the byline visually balanced
+                (mirrors the TestimonialsCarousel avatar fallback). */}
             <div className="flex items-center gap-3">
-              {expertImage && (
+              {expertImage ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={expertImage}
                   alt={expertName}
                   className="w-12 h-12 rounded-full object-cover bg-[var(--color-accent-soft)]"
                 />
+              ) : (
+                <ExpertInitialCircle name={expertName} />
               )}
               <div>
                 <p className="font-semibold text-[var(--color-text)] text-sm">{expertName}</p>
@@ -87,5 +98,43 @@ export default function ExpertSection({
         </div>
       </Container>
     </SectionShell>
+  );
+}
+
+// ── Missing-media fallbacks ──────────────────────────────────────────────────
+//
+// Rendered when `expertImage` and `videoUrl` are both absent (or when only
+// the avatar-sized slot is empty). Uses the storefront's existing accent-soft
+// gradient so the empty state reads as a deliberate branded placeholder rather
+// than a layout accident. Contains no data — presentation only.
+
+function expertInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).slice(0, 2);
+  const initials = parts.map((p) => p.charAt(0).toUpperCase()).join("");
+  return initials || "?";
+}
+
+function ExpertPortraitPlaceholder({ name }: { name: string }) {
+  return (
+    <div
+      role="img"
+      aria-label={name || "Portret eksperta"}
+      className="aspect-square max-w-md mx-auto rounded-[var(--radius)] bg-gradient-to-br from-[var(--color-accent-soft)] to-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center shadow-lg"
+    >
+      <span className="text-6xl font-extrabold tracking-tight text-[var(--color-accent)]/80">
+        {expertInitials(name)}
+      </span>
+    </div>
+  );
+}
+
+function ExpertInitialCircle({ name }: { name: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="w-12 h-12 rounded-full bg-[var(--color-accent-soft)] flex items-center justify-center text-[var(--color-accent)] font-bold text-base"
+    >
+      {expertInitials(name)}
+    </div>
   );
 }

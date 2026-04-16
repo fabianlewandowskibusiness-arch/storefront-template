@@ -320,9 +320,12 @@ function Card({ review, videoRef, roleListItem }: CardProps) {
             />
           )
         ) : (
-          /* No-media fallback — a branded gradient block with a pull-quote
-             glyph. Keeps the card aspect ratio so the stream stays visually
-             uniform even when a customer sends only text. */
+          /* Missing-media fallback — rendered when `review.media.url` is
+             empty, which maps to the canonical UGC `items[].imageUrl`
+             field being `null` (see lib/storefront/mediaFields.ts).
+             A branded gradient block with a pull-quote glyph keeps the
+             card aspect ratio so the stream stays visually uniform even
+             when a customer sent only text. */
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--color-accent-soft)] to-[var(--color-accent)]/20">
             <svg
               className="w-16 h-16 text-[var(--color-accent)] opacity-60"

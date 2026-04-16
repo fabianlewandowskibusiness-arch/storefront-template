@@ -98,6 +98,10 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
     //   primaryCtaLabel, secondaryCtaLabel
     //   trustBadge, deliveryInfo, paymentInfo — legacy display hints (optional)
     //   stickyBuyBar: StickyBuyBarSettings
+    //
+    // Media contract (see lib/storefront/mediaFields.ts):
+    //   • gallery is the gallery field — may be `[]`. HeroSection renders
+    //     a neutral product-photo placeholder when the gallery is empty.
     case "HERO": {
       // Gallery: string[] → GalleryItem[]
       const gallery: GalleryItem[] = arr<string>(data, "gallery").map(
@@ -249,6 +253,10 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
     // ── TESTIMONIALS ─────────────────────────────────────────────────────────
     // Canonical: data.title, data.testimonials — Testimonial[]
     // renderSection maps Testimonial fields → component prop names
+    //
+    // Media contract (see lib/storefront/mediaFields.ts):
+    //   • testimonials[].avatarUrl — may be `null`. TestimonialsCarousel
+    //     renders an initial-letter circle when the avatar is absent.
     case "TESTIMONIALS": {
       type TestItem = {
         authorName?: string;
@@ -341,6 +349,13 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
     // ── UGC ──────────────────────────────────────────────────────────────────
     // Canonical: data.title, data.description,
     //            data.items — UgcItem[]
+    //
+    // Media contract (see lib/storefront/mediaFields.ts):
+    //   • items[].imageUrl is the single media field — may be `null`.
+    //   • Items WITHOUT media still flow through to the card; the card
+    //     (UgcLoopCarousel.Card) renders a neutral branded fallback when
+    //     `media.url` is empty. We only drop items missing the quote,
+    //     since a review card with no text is structurally empty.
     case "UGC": {
       type UgcItm = {
         imageUrl?: string;
@@ -363,7 +378,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
           location: item.location || undefined,
           rating: item.rating || undefined,
         }))
-        .filter((r) => !!r.media.url && !!r.quote);
+        .filter((r) => !!r.quote);
       return (
         <UgcSection
           key={section.id}
@@ -376,6 +391,10 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
 
     // ── EXPERT ───────────────────────────────────────────────────────────────
     // Canonical: all fields in data
+    //
+    // Media contract (see lib/storefront/mediaFields.ts):
+    //   • expertImage — may be `null`. ExpertSection renders a branded
+    //     initials placeholder when both expertImage and videoUrl are absent.
     case "EXPERT":
       return (
         <ExpertSection
@@ -394,6 +413,10 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
     // Canonical: data.title, data.description (intro),
     //            data.media (image URL),
     //            data.paragraphs — { heading?, body }[]
+    //
+    // Media contract (see lib/storefront/mediaFields.ts):
+    //   • media — may be `null`. StorySection gracefully collapses to a
+    //     centered single-column layout when no media is provided.
     case "STORY": {
       type StoryPara = { heading?: string; body?: string };
       const paragraphs = arr<StoryPara>(data, "paragraphs")
