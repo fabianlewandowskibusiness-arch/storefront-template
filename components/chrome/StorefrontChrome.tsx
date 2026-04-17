@@ -63,7 +63,10 @@ export default function StorefrontChrome({
   return (
     <>
       <AnnouncementStrip items={announcementItems} />
-      <StorefrontHeader storeName={branding.storeName} />
+      <StorefrontHeader
+        storeName={branding.storeName}
+        logoUrl={branding.logoUrl}
+      />
       <HeaderCtaStrip label={headerCtaLabel} />
       <NavigationDrawer branding={branding} />
       <CartDrawer

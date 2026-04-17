@@ -7,13 +7,24 @@ import HeaderNavLinks from "./HeaderNavLinks";
 
 interface StorefrontHeaderProps {
   storeName: string;
+  /**
+   * Canonical `branding.logoUrl` from the storefront config. May be an empty
+   * string when no logo has been uploaded; may also be a broken URL at
+   * runtime. The header handles both gracefully — see `BrandMark` below.
+   */
+  logoUrl?: string;
 }
 
-export default function StorefrontHeader({ storeName }: StorefrontHeaderProps) {
+export default function StorefrontHeader({ storeName, logoUrl }: StorefrontHeaderProps) {
   const toggleNav = useUiStore((s) => s.toggleNav);
   const toggleCart = useUiStore((s) => s.toggleCart);
   const cartCount = useUiStore(selectCartCount);
   const [scrolled, setScrolled] = useState(false);
+  // Track logo load failures so a broken URL (deleted media, expired signed
+  // URL, blocked host, etc.) silently degrades to the text-only brand mark
+  // instead of leaving a broken-image glyph in the header.
+  const [logoBroken, setLogoBroken] = useState(false);
+  const showLogo = !!logoUrl && !logoBroken;
 
   // Shadow-on-scroll — single rAF-throttled scroll listener.
   useEffect(() => {
@@ -60,20 +71,50 @@ export default function StorefrontHeader({ storeName }: StorefrontHeaderProps) {
             </svg>
           </button>
 
-          {/* Store name — left-aligned on desktop so nav links can sit
-              beside it. On mobile, absolutely centred (below) to keep the
-              layout balanced around hamburger + cart. */}
-          <p className="hidden md:block font-extrabold text-[var(--color-text)] text-base tracking-tight uppercase truncate">
-            {storeName}
-          </p>
+          {/* Brand mark — logo (when present) + store name. The logo is
+              intentionally kept small (height-only sizing) so the header
+              stays a subtle brand strip rather than a banner. Left-aligned
+              on desktop so nav links can sit beside it; on mobile the same
+              cluster is absolutely centred (below) to keep the layout
+              balanced around hamburger + cart. */}
+          <div className="hidden md:flex items-center gap-2.5 min-w-0">
+            {showLogo && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={logoUrl}
+                alt={storeName}
+                onError={() => setLogoBroken(true)}
+                className="h-6 w-auto max-w-[140px] object-contain shrink-0"
+                loading="eager"
+                decoding="async"
+                draggable={false}
+              />
+            )}
+            <p className="font-extrabold text-[var(--color-text)] text-base tracking-tight uppercase truncate">
+              {storeName}
+            </p>
+          </div>
 
           {/* Desktop inline nav */}
           <HeaderNavLinks />
         </div>
 
-        {/* ── Mobile centre: store name absolutely positioned ── */}
-        <div className="md:hidden absolute left-1/2 -translate-x-1/2 pointer-events-none">
-          <p className="font-extrabold text-[var(--color-text)] text-sm tracking-tight uppercase truncate max-w-[60vw]">
+        {/* ── Mobile centre: logo + store name absolutely positioned ── */}
+        <div className="md:hidden absolute left-1/2 -translate-x-1/2 pointer-events-none flex items-center gap-2 max-w-[60vw]">
+          {showLogo && (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={logoUrl}
+              alt=""
+              onError={() => setLogoBroken(true)}
+              className="h-5 w-auto max-w-[96px] object-contain shrink-0"
+              loading="eager"
+              decoding="async"
+              draggable={false}
+              aria-hidden="true"
+            />
+          )}
+          <p className="font-extrabold text-[var(--color-text)] text-sm tracking-tight uppercase truncate">
             {storeName}
           </p>
         </div>
