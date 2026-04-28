@@ -93,8 +93,12 @@ export default async function StorefrontLayout({
   const commerce = createCommerceProvider(config.commerce);
   const checkoutUrl = commerce?.getCheckoutUrl() ?? "#offer";
 
-  // Available server-side only — not exposed to the client bundle.
-  const storeId = process.env.STORE_ID;
+  // storeId: in host-based (multi-tenant) mode this comes from config.storeId,
+  // which the backend populates from the project's pipelineSessionId.
+  // In legacy (STORE_ID env) mode it also comes from config.storeId (undefined)
+  // so we fall back to STORE_ID. In local dev both are undefined — checkout is
+  // disabled in that case (useCheckout shows a dev warning).
+  const storeId = config.storeId ?? process.env.STORE_ID;
   const apiUrl = process.env.STOREFRONT_API_URL ?? "";
 
   return (

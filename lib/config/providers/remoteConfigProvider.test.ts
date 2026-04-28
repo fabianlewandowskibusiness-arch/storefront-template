@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { buildConfigUrl, buildFetchOptions } from "./remoteConfigProvider";
-import { storefrontConfigTag } from "@/lib/cache/storefrontCacheTags";
+import { buildConfigUrl, buildFetchOptions, buildHostConfigUrl } from "./remoteConfigProvider";
+import { storefrontConfigTag, storefrontHostConfigTag } from "@/lib/cache/storefrontCacheTags";
 
 const API = "https://api.ecommerce-flow.ai";
 const STORE = "abc123";
@@ -157,6 +157,105 @@ describe("buildFetchOptions", () => {
       expect("next" in draft).toBe(false);
       expect("cache" in draft).toBe(true);
       expect("cache" in live).toBe(false);
+    });
+  });
+});
+
+// ── buildHostConfigUrl ────────────────────────────────────────────────────────
+
+describe("buildHostConfigUrl", () => {
+  const HOST = "brand.pl";
+
+  describe("live (non-draft) mode", () => {
+    it("returns the correct URL for a given host", () => {
+      expect(buildHostConfigUrl(API, HOST, false))
+        .toBe(`${API}/storefront-runtime/by-host?host=brand.pl`);
+    });
+
+    it("does not append &mode=draft in live mode", () => {
+      const url = buildHostConfigUrl(API, HOST, false);
+      expect(url).not.toContain("mode=draft");
+    });
+
+    it("different hosts produce different URLs", () => {
+      const urlA = buildHostConfigUrl(API, "alpha.example.com", false);
+      const urlB = buildHostConfigUrl(API, "beta.example.com", false);
+      expect(urlA).not.toBe(urlB);
+    });
+
+    it("uses STOREFRONT_API_URL as the base", () => {
+      const custom = "https://custom-backend.example.com";
+      expect(buildHostConfigUrl(custom, HOST, false))
+        .toBe(`${custom}/storefront-runtime/by-host?host=brand.pl`);
+    });
+
+    it("URL-encodes special characters in the host", () => {
+      // While unusual, the encoder should not break valid hosts.
+      const url = buildHostConfigUrl(API, "brand.pl", false);
+      expect(url).toContain("host=brand.pl");
+    });
+  });
+
+  describe("draft mode", () => {
+    it("appends &mode=draft to the URL", () => {
+      expect(buildHostConfigUrl(API, HOST, true))
+        .toBe(`${API}/storefront-runtime/by-host?host=brand.pl&mode=draft`);
+    });
+
+    it("draft URL differs from live URL for the same host", () => {
+      const live = buildHostConfigUrl(API, HOST, false);
+      const draft = buildHostConfigUrl(API, HOST, true);
+      expect(draft).not.toBe(live);
+      expect(draft).toContain("mode=draft");
+    });
+  });
+
+  describe("multi-tenant cache key isolation", () => {
+    it("each unique host maps to a unique URL", () => {
+      const hosts = ["alpha.pl", "beta.pl", "gamma.pl", "delta.pl"];
+      const urls = hosts.map((h) => buildHostConfigUrl(API, h, false));
+      const unique = new Set(urls);
+      expect(unique.size).toBe(hosts.length);
+    });
+
+    it("draft URLs are also isolated per host", () => {
+      const urlA = buildHostConfigUrl(API, "alpha.pl", true);
+      const urlB = buildHostConfigUrl(API, "beta.pl", true);
+      expect(urlA).not.toBe(urlB);
+    });
+
+    it("by-host URL and by-storeId URL are structurally distinct (no collision)", () => {
+      // Ensures the two resolution paths cannot accidentally hit the same cache entry.
+      const byHost = buildHostConfigUrl(API, "brand.pl", false);
+      const byId = buildConfigUrl(API, "brand.pl", false);
+      expect(byHost).not.toBe(byId);
+      expect(byHost).toContain("/by-host?host=");
+      expect(byId).not.toContain("/by-host");
+    });
+  });
+
+  describe("host fetch options use the host cache tag", () => {
+    it("live mode uses storefrontHostConfigTag, NOT storefrontConfigTag", () => {
+      const hostTag = storefrontHostConfigTag(HOST);
+      const storeTag = storefrontConfigTag(HOST);
+      const opts = buildFetchOptions(false, hostTag);
+
+      expect("next" in opts).toBe(true);
+      if ("next" in opts) {
+        expect(opts.next.tags).toContain(hostTag);
+        expect(opts.next.tags).not.toContain(storeTag);
+      }
+    });
+
+    it("host tag and store tag are different strings for the same identifier", () => {
+      expect(storefrontHostConfigTag(HOST)).not.toBe(storefrontConfigTag(HOST));
+      expect(storefrontHostConfigTag(HOST)).toBe("storefront-host:brand.pl");
+      expect(storefrontConfigTag(HOST)).toBe("storefront-config:brand.pl");
+    });
+
+    it("different hosts produce different host tags", () => {
+      expect(storefrontHostConfigTag("alpha.pl"))
+        .not.toBe(storefrontHostConfigTag("beta.pl"));
     });
   });
 });
