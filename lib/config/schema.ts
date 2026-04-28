@@ -187,6 +187,10 @@ const legalPagesSchema = z.object({
 // ── Top-level config ──────────────────────────────────────────────────────────
 
 export const storefrontConfigSchema = z.object({
+  // storeId: included by the backend in the by-host response so the storefront
+  // can use the correct pipelineSessionId for commerce handoff and cache tags.
+  // Absent in local dev configs — always optional so existing tooling is unaffected.
+  storeId: z.string().optional(),
   theme:    themeSchema,
   branding: brandingSchema,
   // pages must have at least one entry — a config with no pages is structurally
