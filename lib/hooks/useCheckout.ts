@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { trackBeginCheckout } from "@/lib/analytics/tracking";
+import { joinApiUrl } from "@/lib/url";
 import {
   selectCartIsEmpty,
   selectCartSubtotal,
@@ -192,7 +193,7 @@ export function useCheckout({
 
     const handoffUrl =
       pluginHandoffUrl ||
-      `${apiUrl}/api/storefront-runtime/${storeId}/commerce/handoff`;
+      joinApiUrl(apiUrl, `/api/storefront-runtime/${storeId}/commerce/handoff`);
 
     const body: CartHandoffRequest = {
       lines: toHandoffLines(cartItems),

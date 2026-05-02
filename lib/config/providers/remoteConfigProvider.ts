@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { storefrontConfigSchema } from "../schema";
 import { normalizeMediaUrls } from "../normalizeMediaUrls";
 import { storefrontConfigTag, storefrontHostConfigTag } from "@/lib/cache/storefrontCacheTags";
+import { assertOriginOnly, joinApiUrl } from "@/lib/url";
 import type { StorefrontConfig } from "@/types/storefront";
 
 const DEFAULT_API_URL = "https://api.ecommerce-flow.ai";
@@ -18,22 +19,21 @@ function logHost(host: string, message: string, ...args: unknown[]) {
 
 
 /**
- * Builds the backend URL used to fetch a storefront's runtime config.
+ * Builds the backend URL used to fetch a storefront's runtime config by storeId.
  *
  * Exported as a pure function so it can be unit-tested independently of
  * Next.js runtime internals (headers(), redirect(), etc.).
  *
- * Multi-tenant note: once the backend exposes
- *   GET /storefront-runtime/by-host?host={hostname}
- * this function (or a sibling) will be updated to accept a `host` argument
- * instead of `storeId`, enabling host-based tenant resolution.
+ * `apiUrl` MUST be an origin-only value (no /api suffix) — validated by
+ * assertOriginOnly() before this function is called. The /api path segment
+ * is always appended here via joinApiUrl().
  */
 export function buildConfigUrl(
   apiUrl: string,
   storeId: string,
   isDraft: boolean,
 ): string {
-  const base = `${apiUrl}/storefront-runtime/${storeId}`;
+  const base = joinApiUrl(apiUrl, `/api/storefront-runtime/${storeId}`);
   return isDraft ? `${base}?mode=draft` : base;
 }
 
@@ -74,7 +74,9 @@ export function buildFetchOptions(
 
 export async function loadRemoteConfig(): Promise<StorefrontConfig> {
   const storeId = process.env.STORE_ID;
-  const apiUrl = (process.env.STOREFRONT_API_URL || DEFAULT_API_URL).replace(/\/$/, "");
+  const rawApiUrl = process.env.STOREFRONT_API_URL || DEFAULT_API_URL;
+  // Validate and clean: throws at request time if STOREFRONT_API_URL ends with /api.
+  const apiUrl = assertOriginOnly(rawApiUrl, "STOREFRONT_API_URL");
 
   if (!storeId) {
     throw new Error("STORE_ID is required for remote config loading");
@@ -139,19 +141,25 @@ export async function loadRemoteConfig(): Promise<StorefrontConfig> {
  *
  * Exported as a pure function for unit testing.
  *
- * @example
- *   buildHostConfigUrl("https://api.example.com", "brand.pl", false)
- *   // → "https://api.example.com/storefront-runtime/by-host?host=brand.pl"
+ * `apiUrl` MUST be an origin-only value (no /api suffix). The /api path
+ * segment is appended here via joinApiUrl().
  *
- *   buildHostConfigUrl("https://api.example.com", "brand.pl", true)
- *   // → "https://api.example.com/storefront-runtime/by-host?host=brand.pl&mode=draft"
+ * @example
+ *   buildHostConfigUrl("https://api.ecommerce-flow.ai", "brand.pl", false)
+ *   // → "https://api.ecommerce-flow.ai/api/storefront-runtime/by-host?host=brand.pl"
+ *
+ *   buildHostConfigUrl("https://api.ecommerce-flow.ai", "brand.pl", true)
+ *   // → "https://api.ecommerce-flow.ai/api/storefront-runtime/by-host?host=brand.pl&mode=draft"
  */
 export function buildHostConfigUrl(
   apiUrl: string,
   host: string,
   isDraft: boolean,
 ): string {
-  const base = `${apiUrl}/storefront-runtime/by-host?host=${encodeURIComponent(host)}`;
+  const base = joinApiUrl(
+    apiUrl,
+    `/api/storefront-runtime/by-host?host=${encodeURIComponent(host)}`,
+  );
   return isDraft ? `${base}&mode=draft` : base;
 }
 
@@ -175,7 +183,9 @@ export function buildHostConfigUrl(
  * IMPORTANT: Does NOT read `STORE_ID`. This loader is exclusively host-based.
  */
 export async function loadRemoteConfigByHost(): Promise<StorefrontConfig> {
-  const apiUrl = (process.env.STOREFRONT_API_URL || DEFAULT_API_URL).replace(/\/$/, "");
+  const rawApiUrl = process.env.STOREFRONT_API_URL || DEFAULT_API_URL;
+  // Validate and clean: throws at request time if STOREFRONT_API_URL ends with /api.
+  const apiUrl = assertOriginOnly(rawApiUrl, "STOREFRONT_API_URL");
 
   const requestHeaders = await headers();
 

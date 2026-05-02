@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { assertOriginOnly, joinApiUrl } from "@/lib/url";
 
 export const dynamic = "force-dynamic";
 
@@ -79,11 +80,17 @@ export async function GET() {
     });
   }
 
-  const apiUrl = (
-    process.env.STOREFRONT_API_URL ?? "https://api.ecommerce-flow.ai"
-  ).replace(/\/$/, "");
+  // Validate: throws immediately if STOREFRONT_API_URL ends with /api.
+  // Convention: STOREFRONT_API_URL must be origin-only — /api/ is appended by code.
+  const apiUrl = assertOriginOnly(
+    process.env.STOREFRONT_API_URL ?? "https://api.ecommerce-flow.ai",
+    "STOREFRONT_API_URL",
+  );
 
-  const backendUrl = `${apiUrl}/storefront-runtime/by-host?host=${encodeURIComponent(host)}`;
+  const backendUrl = joinApiUrl(
+    apiUrl,
+    `/api/storefront-runtime/by-host?host=${encodeURIComponent(host)}`,
+  );
 
   console.log("[ecf-ping] Resolving host:", host, "→", backendUrl);
 

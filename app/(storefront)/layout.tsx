@@ -3,6 +3,7 @@ import { getStorefrontConfig } from "@/lib/config/getStorefrontConfig";
 import { buildThemeVariables } from "@/lib/storefront/buildThemeVariables";
 import { createCommerceProvider } from "@/lib/commerce/provider";
 import StorefrontChrome, { Footer } from "@/components/chrome/StorefrontChrome";
+import { assertOriginOnly } from "@/lib/url";
 import type { StorefrontConfig } from "@/types/storefront";
 
 /**
@@ -99,7 +100,10 @@ export default async function StorefrontLayout({
   // so we fall back to STORE_ID. In local dev both are undefined — checkout is
   // disabled in that case (useCheckout shows a dev warning).
   const storeId = config.storeId ?? process.env.STORE_ID;
-  const apiUrl = process.env.STOREFRONT_API_URL ?? "";
+  // Validate: assertOriginOnly throws if STOREFRONT_API_URL ends with /api.
+  // The hook uses this to construct /api/storefront-runtime/... handoff URLs.
+  const rawApiUrl = process.env.STOREFRONT_API_URL ?? "";
+  const apiUrl = rawApiUrl ? assertOriginOnly(rawApiUrl, "STOREFRONT_API_URL") : "";
 
   return (
     <div lang={config.branding.language} style={themeVars as React.CSSProperties}>

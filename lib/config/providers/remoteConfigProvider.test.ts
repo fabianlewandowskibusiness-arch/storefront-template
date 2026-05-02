@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import { buildConfigUrl, buildFetchOptions, buildHostConfigUrl } from "./remoteConfigProvider";
 import { storefrontConfigTag, storefrontHostConfigTag } from "@/lib/cache/storefrontCacheTags";
 
+// All backend URLs must include /api/ — STOREFRONT_API_URL is origin-only and
+// buildConfigUrl / buildHostConfigUrl always append /api/storefront-runtime/...
 const API = "https://api.ecommerce-flow.ai";
 const STORE = "abc123";
 
@@ -9,9 +11,10 @@ const STORE = "abc123";
 
 describe("buildConfigUrl", () => {
   describe("live (non-draft) mode", () => {
-    it("returns the correct URL for a given storeId", () => {
-      expect(buildConfigUrl(API, STORE, false))
-        .toBe(`${API}/storefront-runtime/${STORE}`);
+    it("returns the correct URL with /api/storefront-runtime prefix", () => {
+      expect(buildConfigUrl(API, STORE, false)).toBe(
+        `${API}/api/storefront-runtime/${STORE}`,
+      );
     });
 
     it("does not append ?mode=draft", () => {
@@ -21,8 +24,9 @@ describe("buildConfigUrl", () => {
 
     it("works with a trailing-slash-stripped apiUrl", () => {
       const stripped = "https://api.ecommerce-flow.ai";
-      expect(buildConfigUrl(stripped, STORE, false))
-        .toBe(`${stripped}/storefront-runtime/${STORE}`);
+      expect(buildConfigUrl(stripped, STORE, false)).toBe(
+        `${stripped}/api/storefront-runtime/${STORE}`,
+      );
     });
 
     it("different storeIds produce different URLs", () => {
@@ -30,12 +34,17 @@ describe("buildConfigUrl", () => {
       const urlB = buildConfigUrl(API, "store-b", false);
       expect(urlA).not.toBe(urlB);
     });
+
+    it("URL does not contain /api/api", () => {
+      expect(buildConfigUrl(API, STORE, false)).not.toContain("/api/api");
+    });
   });
 
   describe("draft mode", () => {
     it("appends ?mode=draft to the URL", () => {
-      expect(buildConfigUrl(API, STORE, true))
-        .toBe(`${API}/storefront-runtime/${STORE}?mode=draft`);
+      expect(buildConfigUrl(API, STORE, true)).toBe(
+        `${API}/api/storefront-runtime/${STORE}?mode=draft`,
+      );
     });
 
     it("draft URL differs from live URL for the same storeId", () => {
@@ -46,9 +55,6 @@ describe("buildConfigUrl", () => {
   });
 
   describe("multi-tenant cache key isolation", () => {
-    // In multi-tenant mode the Data Cache key is the fetch URL.
-    // Different stores must produce different URLs so their cached configs
-    // are stored under separate keys and never bleed across tenants.
     it("each unique storeId maps to a unique cache-key URL", () => {
       const stores = ["alpha", "beta", "gamma", "delta"];
       const urls = stores.map((id) => buildConfigUrl(API, id, false));
@@ -72,13 +78,12 @@ describe("buildConfigUrl", () => {
   describe("API URL variations", () => {
     it("uses STOREFRONT_API_URL as the base", () => {
       const custom = "https://custom-backend.example.com";
-      expect(buildConfigUrl(custom, STORE, false))
-        .toBe(`${custom}/storefront-runtime/${STORE}`);
+      expect(buildConfigUrl(custom, STORE, false)).toBe(
+        `${custom}/api/storefront-runtime/${STORE}`,
+      );
     });
 
     it("uses the default API URL when STOREFRONT_API_URL is not set", () => {
-      // In practice the caller strips trailing slashes; the function itself
-      // does not — it trusts the caller to have done that.
       expect(buildConfigUrl(API, STORE, false)).toContain("api.ecommerce-flow.ai");
     });
   });
@@ -167,9 +172,10 @@ describe("buildHostConfigUrl", () => {
   const HOST = "brand.pl";
 
   describe("live (non-draft) mode", () => {
-    it("returns the correct URL for a given host", () => {
-      expect(buildHostConfigUrl(API, HOST, false))
-        .toBe(`${API}/storefront-runtime/by-host?host=brand.pl`);
+    it("returns the correct URL with /api/storefront-runtime/by-host prefix", () => {
+      expect(buildHostConfigUrl(API, HOST, false)).toBe(
+        `${API}/api/storefront-runtime/by-host?host=brand.pl`,
+      );
     });
 
     it("does not append &mode=draft in live mode", () => {
@@ -185,21 +191,26 @@ describe("buildHostConfigUrl", () => {
 
     it("uses STOREFRONT_API_URL as the base", () => {
       const custom = "https://custom-backend.example.com";
-      expect(buildHostConfigUrl(custom, HOST, false))
-        .toBe(`${custom}/storefront-runtime/by-host?host=brand.pl`);
+      expect(buildHostConfigUrl(custom, HOST, false)).toBe(
+        `${custom}/api/storefront-runtime/by-host?host=brand.pl`,
+      );
     });
 
     it("URL-encodes special characters in the host", () => {
-      // While unusual, the encoder should not break valid hosts.
       const url = buildHostConfigUrl(API, "brand.pl", false);
       expect(url).toContain("host=brand.pl");
+    });
+
+    it("URL does not contain /api/api", () => {
+      expect(buildHostConfigUrl(API, HOST, false)).not.toContain("/api/api");
     });
   });
 
   describe("draft mode", () => {
     it("appends &mode=draft to the URL", () => {
-      expect(buildHostConfigUrl(API, HOST, true))
-        .toBe(`${API}/storefront-runtime/by-host?host=brand.pl&mode=draft`);
+      expect(buildHostConfigUrl(API, HOST, true)).toBe(
+        `${API}/api/storefront-runtime/by-host?host=brand.pl&mode=draft`,
+      );
     });
 
     it("draft URL differs from live URL for the same host", () => {
@@ -225,7 +236,6 @@ describe("buildHostConfigUrl", () => {
     });
 
     it("by-host URL and by-storeId URL are structurally distinct (no collision)", () => {
-      // Ensures the two resolution paths cannot accidentally hit the same cache entry.
       const byHost = buildHostConfigUrl(API, "brand.pl", false);
       const byId = buildConfigUrl(API, "brand.pl", false);
       expect(byHost).not.toBe(byId);
@@ -254,8 +264,9 @@ describe("buildHostConfigUrl", () => {
     });
 
     it("different hosts produce different host tags", () => {
-      expect(storefrontHostConfigTag("alpha.pl"))
-        .not.toBe(storefrontHostConfigTag("beta.pl"));
+      expect(storefrontHostConfigTag("alpha.pl")).not.toBe(
+        storefrontHostConfigTag("beta.pl"),
+      );
     });
   });
 });
