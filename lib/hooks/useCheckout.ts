@@ -78,7 +78,7 @@ function toHandoffLines(items: CartItem[]): CartHandoffLine[] {
 async function fetchHandoff(
   handoffUrl: string,
   body: CartHandoffRequest,
-): Promise<{ ok: true; redirectUrl: string } | { ok: false; error: string }> {
+): Promise<{ ok: true; checkoutUrl: string } | { ok: false; error: string }> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), HANDOFF_TIMEOUT_MS);
 
@@ -103,11 +103,19 @@ async function fetchHandoff(
 
     const data: CartHandoffResponse = await res.json();
 
-    if (!data.redirectUrl) {
-      return { ok: false, error: "Handoff succeeded but no redirect URL was returned." };
+    // `checkoutUrl` is the primary field (plugin ≥ v1.1.0).
+    // `redirectUrl` is the legacy alias kept for backward compatibility with plugin < v1.1.0.
+    const resolvedUrl = data.checkoutUrl ?? data.redirectUrl;
+
+    if (!resolvedUrl) {
+      const keys = Object.keys(data as object).join(", ") || "(empty)";
+      return {
+        ok: false,
+        error: `Handoff succeeded but no redirect URL was returned. Response keys: ${keys}`,
+      };
     }
 
-    return { ok: true, redirectUrl: data.redirectUrl };
+    return { ok: true, checkoutUrl: resolvedUrl };
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") {
       return { ok: false, error: "Checkout timed out. Please try again." };
@@ -202,7 +210,7 @@ export function useCheckout({
 
     fetchHandoff(handoffUrl, body).then((result) => {
       if (result.ok) {
-        window.location.href = result.redirectUrl;
+        window.location.href = result.checkoutUrl;
       } else {
         setIsSubmitting(false);
         setHandoffError(result.error);

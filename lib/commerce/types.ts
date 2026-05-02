@@ -36,8 +36,17 @@ export interface CartHandoffRequest {
 
 /** Successful response from the cart handoff endpoint. */
 export interface CartHandoffResponse {
-  /** Fully-qualified WooCommerce URL to redirect the buyer to. */
-  redirectUrl: string;
+  /**
+   * Fully-qualified WooCommerce URL to redirect the buyer to.
+   * Primary field — returned by backend since plugin v1.1.0.
+   */
+  checkoutUrl: string;
+  /**
+   * @deprecated Backward-compatibility alias for {@link checkoutUrl}.
+   * Returned by plugin < v1.1.0. Prefer `checkoutUrl` — this field will
+   * be removed once all deployed plugins are upgraded.
+   */
+  redirectUrl?: string;
   /** Non-fatal informational warnings. */
   warnings: string[];
   /** Human-readable cart summary (for debugging). */

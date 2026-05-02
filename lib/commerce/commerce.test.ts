@@ -291,6 +291,57 @@ describe("one-mode checkout: no silent URL-only fallback", () => {
   });
 });
 
+// ── Cart handoff response: URL field resolution ───────────────────────────────
+//
+// The backend returns `checkoutUrl` (primary, since plugin v1.1.0).
+// Plugin < v1.1.0 returned `redirectUrl` (legacy alias).
+// The storefront must read `checkoutUrl ?? redirectUrl` to support both.
+
+describe("CartHandoffResponse URL resolution", () => {
+  /** Mirrors the resolution logic inside fetchHandoff in useCheckout.ts. */
+  function resolveHandoffUrl(data: {
+    checkoutUrl?: string;
+    redirectUrl?: string;
+  }): string | undefined {
+    return data.checkoutUrl ?? data.redirectUrl;
+  }
+
+  it("reads checkoutUrl when present (primary path, plugin ≥ v1.1.0)", () => {
+    const data = {
+      checkoutUrl: "https://sklep.pl/koszyk/?ecf_cart=TOKEN",
+      warnings: [],
+      cartSummary: "1 line(s) via plugin",
+    };
+    expect(resolveHandoffUrl(data)).toBe("https://sklep.pl/koszyk/?ecf_cart=TOKEN");
+  });
+
+  it("falls back to redirectUrl when checkoutUrl is absent (plugin < v1.1.0)", () => {
+    const data = {
+      redirectUrl: "https://sklep.pl/koszyk/?ecf_cart=LEGACY",
+      warnings: [],
+      cartSummary: "1 line(s) via plugin",
+    };
+    expect(resolveHandoffUrl(data)).toBe("https://sklep.pl/koszyk/?ecf_cart=LEGACY");
+  });
+
+  it("prefers checkoutUrl over redirectUrl when both are present", () => {
+    const data = {
+      checkoutUrl: "https://sklep.pl/koszyk/?ecf_cart=NEW",
+      redirectUrl: "https://sklep.pl/koszyk/?ecf_cart=OLD",
+    };
+    expect(resolveHandoffUrl(data)).toBe("https://sklep.pl/koszyk/?ecf_cart=NEW");
+  });
+
+  it("returns undefined when neither field is present — triggers diagnostic error", () => {
+    const data = {};
+    const url = resolveHandoffUrl(data);
+    expect(url).toBeUndefined();
+    // In fetchHandoff, this produces an error with response keys for diagnostics.
+    const keys = Object.keys(data).join(", ") || "(empty)";
+    expect(keys).toBe("(empty)");
+  });
+});
+
 // ── Currency rendering from runtime config ───────────────────────────────────
 
 describe("currency propagation", () => {
