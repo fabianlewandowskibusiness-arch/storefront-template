@@ -14,8 +14,14 @@ interface ComparisonSectionProps {
   subtitle?: string;
   brandName: string;
   rows: ComparisonRow[];
-  /** Product image URL — usually the first HERO gallery image. */
+  /** Our product image URL — shown in the left (recommended) card. */
   productImage?: string;
+  /**
+   * Compared / alternative product image URL — shown in the right (competitor)
+   * card. When provided, replaces the dashed placeholder. When absent, the
+   * placeholder is shown only if `productImage` is set (to keep heights aligned).
+   */
+  comparedProductImage?: string;
   shellOverride?: ShellOverride;
 }
 
@@ -117,6 +123,7 @@ export default function ComparisonSection({
   brandName,
   rows,
   productImage,
+  comparedProductImage,
   shellOverride,
 }: ComparisonSectionProps) {
   if (rows.length === 0) return null;
@@ -195,26 +202,41 @@ export default function ComparisonSection({
                 Typowe poduszki
               </span>
 
-              {/* Visual placeholder to keep card heights aligned on desktop.
-                  The left card has an image block; this empty spacer mirrors
-                  its height so the two columns stay symmetric. */}
-              {productImage && (
-                <div className="flex justify-center mb-5" aria-hidden="true">
-                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-[var(--radius)] border border-dashed border-[var(--color-border)] bg-[var(--color-background)] flex items-center justify-center text-[var(--color-text-muted)]">
-                    <svg
-                      className="w-8 h-8 opacity-40"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"
+              {/* Image slot — shows compared product image when provided;
+                  falls back to a dashed placeholder that mirrors the left
+                  card's image height so the two columns stay symmetric. */}
+              {(comparedProductImage || productImage) && (
+                <div className="flex justify-center mb-5">
+                  {comparedProductImage ? (
+                    <div className="w-28 h-28 md:w-32 md:h-32 rounded-[var(--radius)] overflow-hidden bg-white/5 shadow-sm">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={comparedProductImage}
+                        alt="Produkt porównywany"
+                        className="w-full h-full object-cover opacity-60 grayscale"
+                        loading="lazy"
                       />
-                    </svg>
-                  </div>
+                    </div>
+                  ) : (
+                    <div
+                      aria-hidden="true"
+                      className="w-28 h-28 md:w-32 md:h-32 rounded-[var(--radius)] border border-dashed border-[var(--color-border)] bg-[var(--color-background)] flex items-center justify-center text-[var(--color-text-muted)]"
+                    >
+                      <svg
+                        className="w-8 h-8 opacity-40"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"
+                        />
+                      </svg>
+                    </div>
+                  )}
                 </div>
               )}
 

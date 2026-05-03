@@ -103,9 +103,17 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
     //   • gallery is the gallery field — may be `[]`. HeroSection renders
     //     a neutral product-photo placeholder when the gallery is empty.
     case "HERO": {
-      // Gallery: string[] → GalleryItem[]
-      const gallery: GalleryItem[] = arr<string>(data, "gallery").map(
-        (url) => ({ url, alt: ctx.branding.productName, type: "image" as const }),
+      // Gallery: prepend videoUrl (if set) then map gallery images → GalleryItem[].
+      // The video always appears first so it is the primary media in the hero carousel.
+      const videoUrl = s(data, "videoUrl");
+      const gallery: GalleryItem[] = [];
+      if (videoUrl) {
+        gallery.push({ url: videoUrl, alt: ctx.branding.productName, type: "video" as const });
+      }
+      gallery.push(
+        ...arr<string>(data, "gallery").map(
+          (url) => ({ url, alt: ctx.branding.productName, type: "image" as const }),
+        ),
       );
 
       // Packages: PackageOption[] → HeroPackage[]
@@ -225,6 +233,8 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
     // ── COMPARISON ───────────────────────────────────────────────────────────
     // Canonical: data.title, data.subtitle,
     //            data.rows — { feature, productValue, competitorValue }[]
+    //            data.ourProductImage      — our product image (optional, falls back to heroImage)
+    //            data.comparedProductImage — competitor product image (optional)
     // renderSection maps backend field names → component prop names
     case "COMPARISON": {
       type CompRow = {
@@ -237,13 +247,18 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
         ours: r.productValue ?? "",
         other: r.competitorValue ?? "",
       }));
+      // Our product image: explicit section field takes precedence over the
+      // context heroImage so editors can pick a different crop for comparison.
+      const ourImage = s(data, "ourProductImage") || ctx.heroImage;
+      const comparedImage = s(data, "comparedProductImage") || undefined;
       return (
         <ComparisonSection
           key={section.id}
           title={s(data, "title")}
           subtitle={s(data, "subtitle") || undefined}
           brandName={ctx.branding.productName}
-          productImage={ctx.heroImage}
+          productImage={ourImage}
+          comparedProductImage={comparedImage}
           shellOverride={shellOverride}
           rows={rows}
         />

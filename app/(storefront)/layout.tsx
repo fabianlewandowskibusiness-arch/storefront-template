@@ -4,12 +4,18 @@ import { buildThemeVariables } from "@/lib/storefront/buildThemeVariables";
 import { createCommerceProvider } from "@/lib/commerce/provider";
 import StorefrontChrome, { Footer } from "@/components/chrome/StorefrontChrome";
 import type { StorefrontConfig } from "@/types/storefront";
+import { deriveExpertAnnouncementCta } from "@/lib/storefront/expertCta";
 
 /**
  * Pull announcement ticker items out of the first ANNOUNCEMENT section,
  * if one exists. The announcement used to render inline via renderSection;
  * it now lives in chrome above the sticky header, so the layout extracts
  * the items here and the renderer skips ANNOUNCEMENT entirely.
+ *
+ * After extraction, any item matching the "👉 … opini…" pattern is replaced
+ * with a CTA derived from the Expert section data via deriveExpertAnnouncementCta.
+ * This corrects AI-generated text that may not match the actual specialist
+ * type configured for this storefront.
  */
 function extractAnnouncementItems(config: StorefrontConfig): string[] {
   const home = config.pages.find((p) => p.type === "HOME") ?? config.pages[0];
@@ -18,13 +24,20 @@ function extractAnnouncementItems(config: StorefrontConfig): string[] {
   if (!ann) return [];
   const raw = ann.data?.items;
   if (!Array.isArray(raw)) return [];
-  return raw
+  const items = raw
     .map((i: unknown) =>
       typeof i === "object" && i && "text" in i
         ? String((i as { text?: string }).text ?? "")
         : "",
     )
     .filter(Boolean);
+
+  // Replace any item that looks like an expert CTA with the derived version.
+  // deriveExpertAnnouncementCta returns null when no Expert section exists
+  // (→ items pass through unchanged) and a string otherwise (→ matching items replaced).
+  const expertCta = deriveExpertAnnouncementCta(home.sections);
+  if (!expertCta) return items;
+  return items.map((text) => (/👉.*opini/i.test(text) ? expertCta : text));
 }
 
 /**
