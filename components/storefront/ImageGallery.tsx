@@ -66,10 +66,15 @@ export default function ImageGallery({ items, productName }: ImageGalleryProps) 
               />
             ) : (
               /* eslint-disable-next-line @next/next/no-img-element */
+              /* object-contain — show the full product regardless of upload
+                 proportions. The stable aspect-square frame prevents layout
+                 shift; the --color-surface background fills the letterbox
+                 bands when the image is not square. GIF animation is
+                 unaffected by object-fit. */
               <img
                 src={item.url}
                 alt={item.alt || productName}
-                className={`w-full h-full object-cover transition-transform duration-700 ease-out ${
+                className={`w-full h-full object-contain transition-transform duration-700 ease-out ${
                   i === activeIndex ? "scale-[1.02] gallery-fade" : "scale-100"
                 }`}
                 loading={i === 0 ? "eager" : "lazy"}

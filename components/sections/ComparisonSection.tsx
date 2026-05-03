@@ -156,12 +156,15 @@ export default function ComparisonSection({
               {/* Product image slot */}
               {productImage && (
                 <div className="flex justify-center mb-5">
+                  {/* object-contain — show the full product regardless of
+                      upload proportions. bg-white ensures a clean neutral
+                      letterbox when the image is not square. */}
                   <div className="w-28 h-28 md:w-32 md:h-32 rounded-[var(--radius)] overflow-hidden bg-white shadow-md">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={productImage}
                       alt={brandName}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                       loading="lazy"
                     />
                   </div>
@@ -204,16 +207,19 @@ export default function ComparisonSection({
 
               {/* Image slot — shows compared product image when provided;
                   falls back to a dashed placeholder that mirrors the left
-                  card's image height so the two columns stay symmetric. */}
+                  card's image height so the two columns stay symmetric.
+                  object-contain ensures the full competitor product is
+                  visible regardless of proportions; grayscale+opacity keeps
+                  it visually subordinate to the "our product" card. */}
               {(comparedProductImage || productImage) && (
                 <div className="flex justify-center mb-5">
                   {comparedProductImage ? (
-                    <div className="w-28 h-28 md:w-32 md:h-32 rounded-[var(--radius)] overflow-hidden bg-white/5 shadow-sm">
+                    <div className="w-28 h-28 md:w-32 md:h-32 rounded-[var(--radius)] overflow-hidden bg-white/10 shadow-sm">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={comparedProductImage}
                         alt="Produkt porównywany"
-                        className="w-full h-full object-cover opacity-60 grayscale"
+                        className="w-full h-full object-contain opacity-60 grayscale"
                         loading="lazy"
                       />
                     </div>
