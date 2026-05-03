@@ -55,9 +55,12 @@ export default function ImageGallery({ items, productName }: ImageGalleryProps) 
             ref={(el) => {
               itemRefs.current[i] = el;
             }}
-            className="snap-start shrink-0 w-full aspect-square relative"
+            className="snap-start shrink-0 w-full aspect-square relative overflow-hidden flex items-center justify-center"
           >
             {item.type === "video" ? (
+              /* Video: w-full h-full fills the flex container's established
+                 square size (height resolves from aspect-square, not the
+                 element's intrinsic ratio). object-cover fills the frame. */
               <video
                 src={item.url}
                 controls
@@ -66,15 +69,22 @@ export default function ImageGallery({ items, productName }: ImageGalleryProps) 
               />
             ) : (
               /* eslint-disable-next-line @next/next/no-img-element */
-              /* object-contain — show the full product regardless of upload
-                 proportions. The stable aspect-square frame prevents layout
-                 shift; the --color-surface background fills the letterbox
-                 bands when the image is not square. GIF animation is
-                 unaffected by object-fit. */
+              /* max-w-full max-h-full — the correct approach for replaced
+                 elements (img) in a fixed-size flex container.
+                 `height: 100%` / `h-full` fails on <img> because browsers
+                 compute it from the intrinsic aspect ratio rather than the
+                 parent's explicit height. `max-h-full` + `max-w-full` instead
+                 lets the browser size the element from its natural dimensions
+                 and then CAPS it at the container bounds, preserving the true
+                 aspect ratio. The flex centering (items-center justify-center
+                 on the parent) places the proportionally-sized element in the
+                 middle, leaving the container background visible as letterbox
+                 bands. object-contain is still correct within those bounds.
+                 GIF animation is unaffected by object-fit. */
               <img
                 src={item.url}
                 alt={item.alt || productName}
-                className={`w-full h-full object-contain transition-transform duration-700 ease-out ${
+                className={`max-w-full max-h-full object-contain transition-transform duration-700 ease-out ${
                   i === activeIndex ? "scale-[1.02] gallery-fade" : "scale-100"
                 }`}
                 loading={i === 0 ? "eager" : "lazy"}
