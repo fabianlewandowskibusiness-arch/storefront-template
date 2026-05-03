@@ -125,12 +125,16 @@ export default function TestimonialsCarousel({
                     When absent we render an initial-letter circle using the
                     author's name — same accent-soft tokens as the avatar slot. */}
                 {item.avatar ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={item.avatar}
-                    alt={item.name}
-                    className="w-14 h-14 rounded-full object-cover bg-[var(--color-accent-soft)]"
-                  />
+                  /* overflow-hidden on the wrapper clips non-square images to
+                     the circle boundary — object-cover alone is insufficient. */
+                  <div className="w-14 h-14 rounded-full overflow-hidden shrink-0 bg-[var(--color-accent-soft)]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.avatar}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 ) : (
                   <div
                     aria-hidden="true"
