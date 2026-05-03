@@ -38,7 +38,32 @@ function extractAnnouncementItems(config: StorefrontConfig): string[] {
   // (→ items pass through unchanged) and a string otherwise (→ matching items replaced).
   const expertCta = deriveExpertAnnouncementCta(home.sections);
   if (!expertCta) return items;
-  return items.map((text) => (/👉.*opini/i.test(text) ? expertCta : text));
+
+  // Broad multi-keyword detector — tolerates the historical data shape where
+  // the 👉 emoji lived in a now-deprecated AnnouncementItem.icon field and
+  // was stripped by the contract enforcer, leaving plain text with no emoji.
+  //
+  // Patterns covered:
+  //   opini[aeę]   — "opinia", "opinie", "opinię"  (any flex form of "opinia")
+  //   \bekspert    — "eksperta", "ekspertów", …
+  //   fizjoterap   — "fizjoterapeuty", "fizjoterapeutka", …
+  //   \bspecjalist — "specjalisty", "specjalistka", …
+  //   \brekomend   — "rekomendacja", "rekomenduje", …
+  //
+  // The 👉 … opini pattern is retained as one of the branches so existing
+  // items that do carry the emoji are still matched without a regex change.
+  function looksLikeExpertCta(text: string): boolean {
+    return (
+      /👉.*opini/i.test(text) ||
+      /opini[aeę]/i.test(text) ||
+      /\bekspert/i.test(text) ||
+      /fizjoterap/i.test(text) ||
+      /\bspecjalist/i.test(text) ||
+      /\brekomend/i.test(text)
+    );
+  }
+
+  return items.map((text) => (looksLikeExpertCta(text) ? expertCta : text));
 }
 
 /**

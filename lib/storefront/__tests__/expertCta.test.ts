@@ -535,6 +535,102 @@ describe("real-world scenarios", () => {
   });
 });
 
+// ── Legacy field fallbacks (pre-contract-enforcement storefronts) ─────────────
+//
+// Old AI-generated storefronts may store the specialist role under field names
+// that predate the canonical contract:
+//   • "credentials" — aliased to "expertRole" by SectionContractEnforcer, but
+//     storefronts generated before the alias was deployed keep the old key.
+//   • "role" — never added to the alias list; stripped as an unknown field by
+//     the enforcer, leaving expertRole absent in stored data.
+//
+// These tests verify that deriveExpertAnnouncementCta handles both legacy
+// shapes without requiring a backend data migration or storefront republish.
+
+describe("legacy field fallback — credentials (pre-alias storefronts)", () => {
+  it("data.credentials used when expertRole absent: 'Fizjoterapeutka' → fizjoterapeutki", () => {
+    expect(
+      deriveExpertAnnouncementCta(expert({ credentials: "Fizjoterapeutka" })),
+    ).toBe("👉 Zobacz opinię fizjoterapeutki");
+  });
+
+  it("data.credentials used when expertRole absent: 'Pediatra' → pediatry", () => {
+    expect(
+      deriveExpertAnnouncementCta(expert({ credentials: "Pediatra" })),
+    ).toBe("👉 Zobacz opinię pediatry");
+  });
+
+  it("data.credentials used when expertRole absent: 'Dietetyk kliniczny' → dietetyka", () => {
+    expect(
+      deriveExpertAnnouncementCta(
+        expert({ credentials: "Dietetyk kliniczny" }),
+      ),
+    ).toBe("👉 Zobacz opinię dietetyka");
+  });
+
+  it("expertRole takes priority over credentials when both are present", () => {
+    expect(
+      deriveExpertAnnouncementCta(
+        expert({ expertRole: "Pediatra", credentials: "Fizjoterapeutka" }),
+      ),
+    ).toBe("👉 Zobacz opinię pediatry");
+  });
+
+  it("falls through to title when credentials is unrecognised", () => {
+    expect(
+      deriveExpertAnnouncementCta(
+        expert({ credentials: "Partner naukowy", title: "Opinia eksperta" }),
+      ),
+    ).toBe("👉 Zobacz opinię eksperta");
+  });
+});
+
+describe("legacy field fallback — role (never aliased, stripped by enforcer)", () => {
+  it("data.role used when expertRole absent: 'Fizjoterapeuta' → fizjoterapeuty", () => {
+    expect(
+      deriveExpertAnnouncementCta(expert({ role: "Fizjoterapeuta" })),
+    ).toBe("👉 Zobacz opinię fizjoterapeuty");
+  });
+
+  it("data.role used when expertRole absent: 'Specjalista ds. zdrowia' → specjalisty", () => {
+    expect(
+      deriveExpertAnnouncementCta(
+        expert({ role: "Specjalista ds. zdrowia" }),
+      ),
+    ).toBe("👉 Zobacz opinię specjalisty");
+  });
+
+  it("expertRole takes priority over role when both are present", () => {
+    expect(
+      deriveExpertAnnouncementCta(
+        expert({ expertRole: "Pediatra", role: "Fizjoterapeuta" }),
+      ),
+    ).toBe("👉 Zobacz opinię pediatry");
+  });
+
+  it("credentials takes priority over role when expertRole is absent", () => {
+    expect(
+      deriveExpertAnnouncementCta(
+        expert({ credentials: "Pediatra", role: "Fizjoterapeuta" }),
+      ),
+    ).toBe("👉 Zobacz opinię pediatry");
+  });
+
+  it("falls through to title when role is unrecognised", () => {
+    expect(
+      deriveExpertAnnouncementCta(
+        expert({ role: "Partner naukowy", title: "Opinia fizjoterapeuty" }),
+      ),
+    ).toBe("👉 Zobacz opinię fizjoterapeuty");
+  });
+
+  it("falls through to fallback when role is unrecognised and title is absent", () => {
+    expect(
+      deriveExpertAnnouncementCta(expert({ role: "Partner naukowy" })),
+    ).toBe("👉 Zobacz opinię eksperta");
+  });
+});
+
 // ── Robustness: non-string field values ignored gracefully ────────────────────
 
 describe("robustness — non-string field values", () => {

@@ -273,9 +273,19 @@ export function deriveExpertAnnouncementCta(
 
   const data = expert.data ?? {};
 
-  // Priority 1 — expertRole
+  // Priority 1 — expertRole (canonical field).
+  // Also checks legacy field names used by old AI prompts before the
+  // SectionContractEnforcer alias pass ran on the stored data:
+  //   • "credentials" → aliased to "expertRole" by the enforcer, but old
+  //     storefronts generated before the alias was added may still use it.
+  //   • "role" → never aliased; the enforcer strips it as an unknown field,
+  //     so old storefronts with data.role receive an empty expertRole. We
+  //     try it here so those storefronts benefit from the derivation without
+  //     requiring a data migration or storefront republish.
   const role =
-    typeof data.expertRole === "string" ? (data.expertRole as string) : "";
+    (typeof data.expertRole    === "string" ? data.expertRole    : "") ||
+    (typeof data.credentials   === "string" ? data.credentials   : "") ||
+    (typeof data.role          === "string" ? data.role          : "");
   if (role) {
     const gen = extractFromRole(role);
     if (gen) return `👉 Zobacz opinię ${gen}`;
