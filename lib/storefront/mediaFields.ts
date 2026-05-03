@@ -38,8 +38,12 @@ export interface SectionMediaDependency {
  */
 export const SECTION_MEDIA_FIELDS = {
   HERO: {
-    singles: [],
+    singles: ["videoUrl"],
     galleries: ["gallery"],
+  },
+  COMPARISON: {
+    singles: ["ourProductImage", "comparedProductImage"],
+    galleries: [],
   },
   UGC: {
     singles: ["items[].imageUrl"],
