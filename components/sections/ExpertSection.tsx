@@ -78,12 +78,16 @@ export default function ExpertSection({
                 (mirrors the TestimonialsCarousel avatar fallback). */}
             <div className="flex items-center gap-3">
               {expertImage ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={expertImage}
-                  alt={expertName}
-                  className="w-12 h-12 rounded-full object-cover bg-[var(--color-accent-soft)]"
-                />
+                /* overflow-hidden wrapper clips non-square images to the
+                   circle — object-cover alone does not clip the overflow. */
+                <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 bg-[var(--color-accent-soft)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={expertImage}
+                    alt={expertName}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               ) : (
                 <ExpertInitialCircle name={expertName} />
               )}
