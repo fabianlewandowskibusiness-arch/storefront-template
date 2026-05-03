@@ -156,15 +156,20 @@ export default function ComparisonSection({
               {/* Product image slot */}
               {productImage && (
                 <div className="flex justify-center mb-5">
-                  {/* object-contain — show the full product regardless of
-                      upload proportions. bg-white ensures a clean neutral
-                      letterbox when the image is not square. */}
-                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-[var(--radius)] overflow-hidden bg-white shadow-md">
+                  {/* flex items-center justify-center + max-w-full max-h-full:
+                      the correct approach for replaced elements (<img>) inside
+                      a fixed-size box. h-full / absolute inset-0 both fail
+                      because browsers compute replaced-element height from the
+                      intrinsic aspect ratio, not the parent's explicit height.
+                      max-w-full max-h-full caps both dimensions at the
+                      container bounds; flex centering letterboxes the result.
+                      bg-white fills any letterbox bands with a neutral background. */}
+                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-[var(--radius)] overflow-hidden bg-white shadow-md flex items-center justify-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={productImage}
                       alt={brandName}
-                      className="w-full h-full object-contain"
+                      className="max-w-full max-h-full object-contain"
                       loading="lazy"
                     />
                   </div>
@@ -213,13 +218,15 @@ export default function ComparisonSection({
                   it visually subordinate to the "our product" card. */}
               {(comparedProductImage || productImage) && (
                 <div className="flex justify-center mb-5">
+                  {/* Same max-w-full max-h-full pattern as the product card —
+                      opacity-60 grayscale keeps competitor visually subordinate. */}
                   {comparedProductImage ? (
-                    <div className="w-28 h-28 md:w-32 md:h-32 rounded-[var(--radius)] overflow-hidden bg-white/10 shadow-sm">
+                    <div className="w-28 h-28 md:w-32 md:h-32 rounded-[var(--radius)] overflow-hidden bg-white/10 shadow-sm flex items-center justify-center">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={comparedProductImage}
                         alt="Produkt porównywany"
-                        className="w-full h-full object-contain opacity-60 grayscale"
+                        className="max-w-full max-h-full object-contain opacity-60 grayscale"
                         loading="lazy"
                       />
                     </div>

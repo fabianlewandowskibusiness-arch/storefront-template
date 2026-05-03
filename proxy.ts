@@ -22,7 +22,15 @@ export function proxy(request: NextRequest) {
   // Host header so the value is always the public-facing hostname.
   const forwardedHost = request.headers.get("x-forwarded-host");
   const host = forwardedHost ?? request.headers.get("host") ?? request.nextUrl.hostname;
-  headers.set("x-storefront-host", host);
+
+  // Skip tenant resolution for localhost / 127.0.0.1 — these are local dev
+  // requests that should fall through to loadLocalConfig() (the config.json
+  // fixture). Setting x-storefront-host on localhost would cause the config
+  // loader to attempt a remote API call that cannot succeed in development.
+  const isLocalhost = /^localhost(:\d+)?$/.test(host) || /^127\.0\.0\.1(:\d+)?$/.test(host);
+  if (!isLocalhost) {
+    headers.set("x-storefront-host", host);
+  }
 
   const mode = request.nextUrl.searchParams.get("mode");
   if (mode === "draft") {
