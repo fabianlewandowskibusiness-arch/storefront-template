@@ -1,5 +1,7 @@
 import Container from "@/components/layout/Container";
 import SectionShell from "@/components/layout/SectionShell";
+import FramedImage from "@/components/ui/FramedImage";
+import type { ImageFrame } from "@/types/storefront";
 
 interface StoryParagraph {
   heading?: string;
@@ -10,10 +12,12 @@ interface StorySectionProps {
   title: string;
   intro?: string;
   image?: string;
+  /** Presentation frame for image. Null = renderer defaults (cover). */
+  imageFrame?: ImageFrame | null;
   paragraphs: StoryParagraph[];
 }
 
-export default function StorySection({ title, intro, image, paragraphs }: StorySectionProps) {
+export default function StorySection({ title, intro, image, imageFrame, paragraphs }: StorySectionProps) {
   // Missing-media fallback: `image` maps to the canonical `media` field, which
   // may be `null` per the storefront media contract (see lib/storefront/mediaFields.ts).
   // When it is absent we deliberately collapse to a single centered column so
@@ -31,10 +35,12 @@ export default function StorySection({ title, intro, image, paragraphs }: StoryS
         >
           {hasImage && (
             <div className="lg:sticky lg:top-8">
-              <div className="aspect-[4/5] rounded-[var(--radius)] overflow-hidden bg-[var(--color-background)] shadow-lg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={image} alt={title} className="w-full h-full object-cover" />
-              </div>
+              <FramedImage
+                src={image!}
+                alt={title}
+                frame={imageFrame}
+                className="aspect-[4/5] rounded-[var(--radius)] shadow-lg bg-[var(--color-background)]"
+              />
             </div>
           )}
 

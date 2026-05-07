@@ -4,6 +4,7 @@ import type {
   CommerceConfig,
   GalleryItem,
   HeroPackage,
+  ImageFrame,
 } from "@/types/storefront";
 import type { ShellOverride } from "@/components/layout/SectionShell";
 import HeroSection from "@/components/sections/HeroSection";
@@ -106,13 +107,20 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
       // Gallery: prepend videoUrl (if set) then map gallery images → GalleryItem[].
       // The video always appears first so it is the primary media in the hero carousel.
       const videoUrl = s(data, "videoUrl");
+      // Section-level imageFrame applies to all gallery images when present.
+      const imageFrame = (data.imageFrame as ImageFrame | null) ?? null;
       const gallery: GalleryItem[] = [];
       if (videoUrl) {
         gallery.push({ url: videoUrl, alt: ctx.branding.productName, type: "video" as const });
       }
       gallery.push(
         ...arr<string>(data, "gallery").map(
-          (url) => ({ url, alt: ctx.branding.productName, type: "image" as const }),
+          (url) => ({
+            url,
+            alt: ctx.branding.productName,
+            type: "image" as const,
+            frame: imageFrame ?? undefined,
+          }),
         ),
       );
 
@@ -251,6 +259,8 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
       // context heroImage so editors can pick a different crop for comparison.
       const ourImage = s(data, "ourProductImage") || ctx.heroImage;
       const comparedImage = s(data, "comparedProductImage") || undefined;
+      const ourProductImageFrame = (data.ourProductImageFrame as ImageFrame | null) ?? null;
+      const comparedProductImageFrame = (data.comparedProductImageFrame as ImageFrame | null) ?? null;
       return (
         <ComparisonSection
           key={section.id}
@@ -258,7 +268,9 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
           subtitle={s(data, "subtitle") || undefined}
           brandName={ctx.branding.productName}
           productImage={ourImage}
+          productImageFrame={ourProductImageFrame}
           comparedProductImage={comparedImage}
+          comparedProductImageFrame={comparedProductImageFrame}
           shellOverride={shellOverride}
           rows={rows}
         />
@@ -276,6 +288,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
       type TestItem = {
         authorName?: string;
         avatarUrl?: string;
+        avatarFrame?: ImageFrame | null;
         quoteShort?: string;
         quoteLong?: string;
         rating?: number;
@@ -285,6 +298,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
         name: t.authorName ?? "",
         quote: t.quoteShort || t.quoteLong || "",
         avatar: t.avatarUrl || undefined,
+        avatarFrame: t.avatarFrame ?? undefined,
         rating: t.rating || undefined,
         location: t.location || undefined,
       }));
@@ -418,7 +432,12 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
           description={s(data, "description")}
           expertName={s(data, "expertName")}
           expertRole={s(data, "expertRole") || undefined}
-          expertImage={s(data, "expertImage") || undefined}
+          expertImage={s(data, "expertImage") || s(data, "expertAvatarUrl") || s(data, "image") || undefined}
+          expertImageFrame={
+            (data.expertImageFrame as ImageFrame | null) ??
+            (data.imageFrame as ImageFrame | null) ??
+            null
+          }
           videoUrl={s(data, "videoUrl") || undefined}
           quote={s(data, "quote") || undefined}
         />
@@ -443,6 +462,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
           title={s(data, "title")}
           intro={s(data, "description") || undefined}
           image={s(data, "media") || undefined}
+          imageFrame={(data.mediaFrame as ImageFrame | null) ?? null}
           paragraphs={paragraphs}
         />
       );
