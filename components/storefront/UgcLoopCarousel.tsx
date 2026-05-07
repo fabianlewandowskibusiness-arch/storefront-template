@@ -21,34 +21,64 @@ export interface UgcMedia {
   frame?: ImageFrame | null;
 }
 
-// ── Frame CSS helper ──────────────────────────────────────────────────────────
+// ── Frame CSS helpers ─────────────────────────────────────────────────────────
 
-function buildCoverFrameStyle(
+/** UGC cards always use a 4:5 media area. */
+const UGC_FRAME_AR = 4 / 5;
+
+/**
+ * AR-aware cover style — requires the image's natural dimensions.
+ * Sizes the element to match the image's own proportions, giving correct
+ * per-axis pan range.  A 16:9 photo overflows horizontally at zoom=1 and can
+ * be panned without extra zoom.
+ */
+function buildCoverFrameStyleAR(
+  frame: ImageFrame | null | undefined,
+  imageAR: number,
+): React.CSSProperties {
+  const zoom    = Math.max(1, frame?.zoom    ?? 1);
+  const rawOffX = frame?.offsetX ?? 0;
+  const rawOffY = frame?.offsetY ?? 0;
+
+  const frameAR = UGC_FRAME_AR;
+  const bw      = imageAR >= frameAR ? (imageAR / frameAR) * 100 : 100;
+  const bh      = imageAR <  frameAR ? (frameAR / imageAR) * 100 : 100;
+  const w       = zoom * bw;
+  const h       = zoom * bh;
+  const maxX    = Math.max(0, (w / 100 - 1) * 50);
+  const maxY    = Math.max(0, (h / 100 - 1) * 50);
+  const offsetX = maxX === 0 ? 0 : Math.max(-maxX, Math.min(maxX, rawOffX));
+  const offsetY = maxY === 0 ? 0 : Math.max(-maxY, Math.min(maxY, rawOffY));
+  return {
+    position:  "absolute" as const,
+    width:     `${w}%`,
+    height:    `${h}%`,
+    left:      `${(100 - w) / 2 + offsetX}%`,
+    top:       `${(100 - h) / 2 + offsetY}%`,
+    objectFit: "cover" as const,
+  };
+}
+
+/**
+ * Legacy fallback used before the image's natural dimensions are known.
+ * Visually correct for default (zoom=1, offset=0) frames.
+ */
+function buildCoverFrameStyleLegacy(
   frame: ImageFrame | null | undefined,
 ): React.CSSProperties {
-  // No frame → standard full-bleed cover (default UGC look).
   if (!frame) {
     return { width: "100%", height: "100%", objectFit: "cover" as const };
   }
-  if (frame.fit === "contain") {
-    // Contain mode: the outer wrapper must become a flex centering box.
-    // (See below — we handle this case separately in the JSX.)
-    return { maxWidth: "100%", maxHeight: "100%", objectFit: "contain" as const };
-  }
-  // Cover mode with optional zoom / pan.
-  // Defensive clamp: zoom < 1 would expose the container background.
-  // The editor enforces zoom ≥ 1, but old/migrated configs may carry values
-  // that pre-date the constraint — clamp here so the renderer is always safe.
   const zoom    = Math.max(1, frame.zoom    ?? 1);
   const maxOff  = (zoom - 1) * 50;
-  const offsetX = Math.max(-maxOff, Math.min(maxOff, frame.offsetX ?? 0));
-  const offsetY = Math.max(-maxOff, Math.min(maxOff, frame.offsetY ?? 0));
+  const offsetX = maxOff === 0 ? 0 : Math.max(-maxOff, Math.min(maxOff, frame.offsetX ?? 0));
+  const offsetY = maxOff === 0 ? 0 : Math.max(-maxOff, Math.min(maxOff, frame.offsetY ?? 0));
   return {
-    position: "absolute" as const,
-    width:    `${zoom * 100}%`,
-    height:   `${zoom * 100}%`,
-    left:     `${(1 - zoom) * 50 + offsetX}%`,
-    top:      `${(1 - zoom) * 50 + offsetY}%`,
+    position:  "absolute" as const,
+    width:     `${zoom * 100}%`,
+    height:    `${zoom * 100}%`,
+    left:      `${(1 - zoom) * 50 + offsetX}%`,
+    top:       `${(1 - zoom) * 50 + offsetY}%`,
     objectFit: "cover" as const,
   };
 }
@@ -323,6 +353,23 @@ function Card({ review, videoRef, roleListItem }: CardProps) {
   const { media, quote, name, location, rating } = review;
   const hasMedia = !!media.url;
 
+  /**
+   * Natural image dimensions — null until the img fires onLoad.
+   * Once known, the AR-aware cover formula gives correct per-axis pan range.
+   */
+  const [imageDims, setImageDims] = useState<{ w: number; h: number } | null>(null);
+
+  const onImgLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
+    if (w > 0 && h > 0) setImageDims({ w, h });
+  };
+
+  // Cover style: AR-aware when dims are known, legacy fallback otherwise.
+  const coverStyle: React.CSSProperties =
+    imageDims && imageDims.w > 0 && imageDims.h > 0
+      ? buildCoverFrameStyleAR(media.frame, imageDims.w / imageDims.h)
+      : buildCoverFrameStyleLegacy(media.frame);
+
   return (
     <figure
       role={roleListItem ? "listitem" : undefined}
@@ -353,18 +400,19 @@ function Card({ review, videoRef, roleListItem }: CardProps) {
                 alt={media.alt || `Opinia od ${name}`}
                 loading="lazy"
                 draggable={false}
-                style={buildCoverFrameStyle(media.frame)}
+                style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
               />
             </div>
           ) : (
-            /* Cover mode — may have zoom/pan offsets from ImageFrame */
+            /* Cover mode — AR-aware zoom/pan offsets from ImageFrame */
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={media.url}
               alt={media.alt || `Opinia od ${name}`}
               loading="lazy"
               draggable={false}
-              style={buildCoverFrameStyle(media.frame)}
+              onLoad={onImgLoad}
+              style={coverStyle}
               className="transition-transform duration-500 ease-out group-hover:scale-105"
             />
           )
