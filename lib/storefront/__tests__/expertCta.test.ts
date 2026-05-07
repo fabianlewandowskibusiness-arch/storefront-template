@@ -19,6 +19,80 @@ function expertWithBoth(role: string, title: string): SectionLike[] {
   return expert({ expertRole: role, title });
 }
 
+// ── Priority 0: explicit expertCtaText override ───────────────────────────────
+
+describe("expertCtaText — explicit override (priority 0)", () => {
+  it("returns bare text prefixed with 👉", () => {
+    expect(
+      deriveExpertAnnouncementCta(
+        expert({ expertCtaText: "Zobacz opinię fizjoterapeutki" }),
+      ),
+    ).toBe("👉 Zobacz opinię fizjoterapeutki");
+  });
+
+  it("normalises input that already starts with 👉", () => {
+    expect(
+      deriveExpertAnnouncementCta(
+        expert({ expertCtaText: "👉 Zobacz opinię pediatry" }),
+      ),
+    ).toBe("👉 Zobacz opinię pediatry");
+  });
+
+  it("trims leading/trailing whitespace before normalising", () => {
+    expect(
+      deriveExpertAnnouncementCta(
+        expert({ expertCtaText: "  Zobacz opinię dietetyka  " }),
+      ),
+    ).toBe("👉 Zobacz opinię dietetyka");
+  });
+
+  it("takes priority over a valid expertRole", () => {
+    expect(
+      deriveExpertAnnouncementCta(
+        expert({ expertCtaText: "Opinia eksperta", expertRole: "Pediatra" }),
+      ),
+    ).toBe("👉 Opinia eksperta");
+  });
+
+  it("takes priority over a valid title pattern", () => {
+    expect(
+      deriveExpertAnnouncementCta(
+        expert({ expertCtaText: "Rekomendacja specjalisty", title: "Opinia pediatry" }),
+      ),
+    ).toBe("👉 Rekomendacja specjalisty");
+  });
+
+  it("falls through to heuristic when expertCtaText is empty string", () => {
+    expect(
+      deriveExpertAnnouncementCta(
+        expert({ expertCtaText: "", expertRole: "Pediatra" }),
+      ),
+    ).toBe("👉 Zobacz opinię pediatry");
+  });
+
+  it("falls through to heuristic when expertCtaText is whitespace only", () => {
+    expect(
+      deriveExpertAnnouncementCta(
+        expert({ expertCtaText: "   ", expertRole: "Fizjoterapeuta" }),
+      ),
+    ).toBe("👉 Zobacz opinię fizjoterapeuty");
+  });
+
+  it("falls through to heuristic when expertCtaText is null", () => {
+    expect(
+      deriveExpertAnnouncementCta(
+        expert({ expertCtaText: null, expertRole: "Neurolog" }),
+      ),
+    ).toBe("👉 Zobacz opinię neurologa");
+  });
+
+  it("falls through to generic fallback when expertCtaText absent and no parseable data", () => {
+    expect(
+      deriveExpertAnnouncementCta(expert({ expertName: "Dr Jan" })),
+    ).toBe("👉 Zobacz opinię eksperta");
+  });
+});
+
 // ── No Expert section ─────────────────────────────────────────────────────────
 
 describe("no Expert section", () => {

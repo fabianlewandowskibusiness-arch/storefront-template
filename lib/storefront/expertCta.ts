@@ -257,6 +257,13 @@ export interface SectionLike {
 /**
  * Derives a natural-sounding Polish expert CTA for the announcement strip.
  *
+ * ## Priority chain
+ *   0. `expertCtaText` — explicit override set by the store editor. When
+ *      present and non-empty, returned immediately; no heuristics run.
+ *   1. `expertRole`    — leading specialist noun converted to genitive.
+ *   2. `title`         — section heading matched against Polish patterns.
+ *   3. Safe fallback   — "👉 Zobacz opinię eksperta".
+ *
  * @param sections — All sections on the page (e.g. `homePage.sections`).
  * @returns A CTA string like "👉 Zobacz opinię pediatry", the safe generic
  *   fallback "👉 Zobacz opinię eksperta" when the Expert section exists but
@@ -272,6 +279,15 @@ export function deriveExpertAnnouncementCta(
   if (!expert) return null;
 
   const data = expert.data ?? {};
+
+  // Priority 0 — explicit override written by the store editor.
+  // Normalise: strip any leading 👉 so the function always owns the prefix.
+  const explicit =
+    typeof data.expertCtaText === "string" ? data.expertCtaText.trim() : "";
+  if (explicit) {
+    const bare = explicit.replace(/^👉\s*/, "");
+    return `👉 ${bare}`;
+  }
 
   // Priority 1 — expertRole (canonical field).
   // Also checks legacy field names used by old AI prompts before the
