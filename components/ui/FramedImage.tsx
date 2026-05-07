@@ -66,7 +66,7 @@ export function FramedImage({
 
   // ── cover mode: absolute-positioned img, zoom + pan applied ──────────────
   //
-  // width  = zoom * 100%
+  // width  = zoom * 100%  (same factor for both dimensions — uniform scaling)
   // height = zoom * 100%
   //
   // Centering without offset: left = (1 - zoom) * 50%   (negative when zoom > 1)
@@ -76,10 +76,18 @@ export function FramedImage({
   //   left = (1 - zoom) * 50% + offsetX%
   //   top  = (1 - zoom) * 50% + offsetY%
   //
+  // Defensive clamp — zoom < 1 would expose the container background.
+  // Any frame that passed through the editor will already satisfy zoom ≥ 1;
+  // this guard protects against old/migrated configs with out-of-range values.
+  const safeZoom    = Math.max(1, zoom);
+  const maxOff      = (safeZoom - 1) * 50;
+  const safeOffsetX = Math.max(-maxOff, Math.min(maxOff, offsetX));
+  const safeOffsetY = Math.max(-maxOff, Math.min(maxOff, offsetY));
+
   const pct = (n: number) => `${n}%`;
-  const size = pct(zoom * 100);
-  const left = pct((1 - zoom) * 50 + offsetX);
-  const top = pct((1 - zoom) * 50 + offsetY);
+  const size = pct(safeZoom * 100);
+  const left = pct((1 - safeZoom) * 50 + safeOffsetX);
+  const top  = pct((1 - safeZoom) * 50 + safeOffsetY);
 
   return (
     <div className={`relative overflow-hidden ${className}`}>

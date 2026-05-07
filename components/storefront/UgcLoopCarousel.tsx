@@ -36,9 +36,13 @@ function buildCoverFrameStyle(
     return { maxWidth: "100%", maxHeight: "100%", objectFit: "contain" as const };
   }
   // Cover mode with optional zoom / pan.
-  const zoom    = frame.zoom    ?? 1;
-  const offsetX = frame.offsetX ?? 0;
-  const offsetY = frame.offsetY ?? 0;
+  // Defensive clamp: zoom < 1 would expose the container background.
+  // The editor enforces zoom ≥ 1, but old/migrated configs may carry values
+  // that pre-date the constraint — clamp here so the renderer is always safe.
+  const zoom    = Math.max(1, frame.zoom    ?? 1);
+  const maxOff  = (zoom - 1) * 50;
+  const offsetX = Math.max(-maxOff, Math.min(maxOff, frame.offsetX ?? 0));
+  const offsetY = Math.max(-maxOff, Math.min(maxOff, frame.offsetY ?? 0));
   return {
     position: "absolute" as const,
     width:    `${zoom * 100}%`,
