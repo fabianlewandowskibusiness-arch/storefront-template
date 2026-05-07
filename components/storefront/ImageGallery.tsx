@@ -1,7 +1,35 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import type { GalleryItem } from "@/types/storefront";
+import type { GalleryItem, ImageFrame } from "@/types/storefront";
+import type React from "react";
+
+// ── Frame helpers ─────────────────────────────────────────────────────────────
+
+/**
+ * Returns CSS for an absolutely-positioned img that implements cover-mode
+ * zoom + pan from an {@link ImageFrame}.  The caller's container must be
+ * `relative overflow-hidden`.
+ */
+function coverFrameStyle(frame: ImageFrame): React.CSSProperties {
+  const zoom = frame.zoom ?? 1;
+  const offsetX = frame.offsetX ?? 0;
+  const offsetY = frame.offsetY ?? 0;
+  return {
+    position: "absolute",
+    width: `${zoom * 100}%`,
+    height: `${zoom * 100}%`,
+    left: `${(1 - zoom) * 50 + offsetX}%`,
+    top: `${(1 - zoom) * 50 + offsetY}%`,
+    objectFit: "cover",
+  };
+}
+
+/** True when a frame requires cover-mode absolute positioning. */
+function isCoverFrame(frame: ImageFrame | null | undefined): boolean {
+  if (!frame) return false;
+  return frame.fit !== "contain";
+}
 
 interface ImageGalleryProps {
   items: GalleryItem[];
@@ -67,20 +95,28 @@ export default function ImageGallery({ items, productName }: ImageGalleryProps) 
                 className="w-full h-full object-cover"
                 playsInline
               />
-            ) : (
+            ) : isCoverFrame(item.frame) ? (
+              /* Frame cover mode: absolute-positioned img with zoom + pan.
+                 The parent's overflow-hidden clips everything outside its bounds.
+                 No scale animation — zoom/offsetX/Y already provide visual framing. */
               /* eslint-disable-next-line @next/next/no-img-element */
-              /* max-w-full max-h-full — the correct approach for replaced
-                 elements (img) in a fixed-size flex container.
+              <img
+                src={item.url}
+                alt={item.alt || productName}
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                style={coverFrameStyle(item.frame!)}
+                loading={i === 0 ? "eager" : "lazy"}
+              />
+            ) : (
+              /* Default — no frame (or contain): letterbox.
+                 max-w-full max-h-full is the correct approach for replaced
+                 elements (<img>) in a fixed-size flex container.
                  `height: 100%` / `h-full` fails on <img> because browsers
                  compute it from the intrinsic aspect ratio rather than the
-                 parent's explicit height. `max-h-full` + `max-w-full` instead
-                 lets the browser size the element from its natural dimensions
-                 and then CAPS it at the container bounds, preserving the true
-                 aspect ratio. The flex centering (items-center justify-center
-                 on the parent) places the proportionally-sized element in the
-                 middle, leaving the container background visible as letterbox
-                 bands. object-contain is still correct within those bounds.
-                 GIF animation is unaffected by object-fit. */
+                 parent's explicit height. `max-h-full` + `max-w-full` lets
+                 the browser size from natural dimensions then caps at container
+                 bounds, preserving the true aspect ratio. GIF animation unaffected. */
+              /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={item.url}
                 alt={item.alt || productName}

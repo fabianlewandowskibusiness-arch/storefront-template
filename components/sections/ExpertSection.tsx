@@ -1,5 +1,7 @@
 import Container from "@/components/layout/Container";
 import SectionShell from "@/components/layout/SectionShell";
+import FramedImage from "@/components/ui/FramedImage";
+import type { ImageFrame } from "@/types/storefront";
 
 interface ExpertSectionProps {
   title: string;
@@ -7,6 +9,8 @@ interface ExpertSectionProps {
   expertName: string;
   expertRole?: string;
   expertImage?: string;
+  /** Presentation frame for expertImage. Null = renderer defaults (cover). */
+  expertImageFrame?: ImageFrame | null;
   videoUrl?: string;
   quote?: string;
 }
@@ -17,6 +21,7 @@ export default function ExpertSection({
   expertName,
   expertRole,
   expertImage,
+  expertImageFrame,
   videoUrl,
   quote,
 }: ExpertSectionProps) {
@@ -41,14 +46,12 @@ export default function ExpertSection({
                 />
               </div>
             ) : expertImage ? (
-              <div className="aspect-square max-w-md mx-auto rounded-[var(--radius)] overflow-hidden bg-[var(--color-surface)] shadow-lg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={expertImage}
-                  alt={expertName}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              <FramedImage
+                src={expertImage}
+                alt={expertName}
+                frame={expertImageFrame}
+                className="aspect-square max-w-md mx-auto rounded-[var(--radius)] shadow-lg bg-[var(--color-surface)]"
+              />
             ) : (
               <ExpertPortraitPlaceholder name={expertName} />
             )}
@@ -78,16 +81,12 @@ export default function ExpertSection({
                 (mirrors the TestimonialsCarousel avatar fallback). */}
             <div className="flex items-center gap-3">
               {expertImage ? (
-                /* overflow-hidden wrapper clips non-square images to the
-                   circle — object-cover alone does not clip the overflow. */
-                <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 bg-[var(--color-accent-soft)]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={expertImage}
-                    alt={expertName}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                <FramedImage
+                  src={expertImage}
+                  alt={expertName}
+                  frame={expertImageFrame}
+                  className="w-12 h-12 rounded-full shrink-0 bg-[var(--color-accent-soft)]"
+                />
               ) : (
                 <ExpertInitialCircle name={expertName} />
               )}

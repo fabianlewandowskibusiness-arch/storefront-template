@@ -2,6 +2,8 @@ import Container from "@/components/layout/Container";
 import SectionShell, { type ShellOverride } from "@/components/layout/SectionShell";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/storefront/Reveal";
+import FramedImage from "@/components/ui/FramedImage";
+import type { ImageFrame } from "@/types/storefront";
 
 interface ComparisonRow {
   label: string;
@@ -16,12 +18,16 @@ interface ComparisonSectionProps {
   rows: ComparisonRow[];
   /** Our product image URL — shown in the left (recommended) card. */
   productImage?: string;
+  /** Presentation frame for productImage. Null = renderer defaults (contain/letterbox). */
+  productImageFrame?: ImageFrame | null;
   /**
    * Compared / alternative product image URL — shown in the right (competitor)
    * card. When provided, replaces the dashed placeholder. When absent, the
    * placeholder is shown only if `productImage` is set (to keep heights aligned).
    */
   comparedProductImage?: string;
+  /** Presentation frame for comparedProductImage. Null = renderer defaults (contain/letterbox). */
+  comparedProductImageFrame?: ImageFrame | null;
   shellOverride?: ShellOverride;
 }
 
@@ -123,7 +129,9 @@ export default function ComparisonSection({
   brandName,
   rows,
   productImage,
+  productImageFrame,
   comparedProductImage,
+  comparedProductImageFrame,
   shellOverride,
 }: ComparisonSectionProps) {
   if (rows.length === 0) return null;
@@ -156,23 +164,12 @@ export default function ComparisonSection({
               {/* Product image slot */}
               {productImage && (
                 <div className="flex justify-center mb-5">
-                  {/* flex items-center justify-center + max-w-full max-h-full:
-                      the correct approach for replaced elements (<img>) inside
-                      a fixed-size box. h-full / absolute inset-0 both fail
-                      because browsers compute replaced-element height from the
-                      intrinsic aspect ratio, not the parent's explicit height.
-                      max-w-full max-h-full caps both dimensions at the
-                      container bounds; flex centering letterboxes the result.
-                      bg-white fills any letterbox bands with a neutral background. */}
-                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-[var(--radius)] overflow-hidden bg-white shadow-md flex items-center justify-center">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={productImage}
-                      alt={brandName}
-                      className="max-w-full max-h-full object-contain"
-                      loading="lazy"
-                    />
-                  </div>
+                  <FramedImage
+                    src={productImage}
+                    alt={brandName}
+                    frame={productImageFrame ?? { fit: "contain" }}
+                    className="w-28 h-28 md:w-32 md:h-32 rounded-[var(--radius)] bg-white shadow-md"
+                  />
                 </div>
               )}
 
@@ -221,15 +218,12 @@ export default function ComparisonSection({
                   {/* Same max-w-full max-h-full pattern as the product card —
                       opacity-60 grayscale keeps competitor visually subordinate. */}
                   {comparedProductImage ? (
-                    <div className="w-28 h-28 md:w-32 md:h-32 rounded-[var(--radius)] overflow-hidden bg-white/10 shadow-sm flex items-center justify-center">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={comparedProductImage}
-                        alt="Produkt porównywany"
-                        className="max-w-full max-h-full object-contain opacity-60 grayscale"
-                        loading="lazy"
-                      />
-                    </div>
+                    <FramedImage
+                      src={comparedProductImage}
+                      alt="Produkt porównywany"
+                      frame={comparedProductImageFrame ?? { fit: "contain" }}
+                      className="w-28 h-28 md:w-32 md:h-32 rounded-[var(--radius)] bg-white/10 shadow-sm opacity-60 grayscale"
+                    />
                   ) : (
                     <div
                       aria-hidden="true"

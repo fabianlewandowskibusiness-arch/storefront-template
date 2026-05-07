@@ -24,6 +24,43 @@ export type SectionType =
   | "STORY"
   | "RISK_REVERSAL";
 
+// ── Image presentation frame ───────────────────────────────────────────────────
+
+/**
+ * Presentation metadata attached as a sidecar field alongside an image URL.
+ *
+ * All fields are optional — omitting them falls back to sensible per-section
+ * defaults, keeping old configs fully compatible.
+ *
+ * Naming convention: for image field `foo`, the sidecar lives in `fooFrame`.
+ * E.g. `expertImage` ↔ `expertImageFrame`, `media` ↔ `mediaFrame`.
+ *
+ * Mirrors {@code ImageFrame.java}.
+ */
+export interface ImageFrame {
+  /**
+   * Scale multiplier. 1.0 = fill the container, > 1.0 = zoom in.
+   * Range 0.5–3.0. Default 1.0.
+   */
+  zoom?: number | null;
+  /**
+   * Horizontal pan as % of container width. Negative = shift left.
+   * Range –50..50. Default 0.
+   */
+  offsetX?: number | null;
+  /**
+   * Vertical pan as % of container height. Negative = shift up.
+   * Range –50..50. Default 0.
+   */
+  offsetY?: number | null;
+  /**
+   * "cover" fills the frame (may crop edges) or
+   * "contain" shows the full image (may letterbox).
+   * Default is section-specific.
+   */
+  fit?: "cover" | "contain" | null;
+}
+
 // ── Announcement ticker ────────────────────────────────────────────────────────
 
 /**
@@ -52,6 +89,8 @@ export interface GalleryItem {
   url: string;
   alt?: string;
   type?: "image" | "video";
+  /** Optional per-item presentation frame. Overrides the section-level imageFrame. */
+  frame?: ImageFrame | null;
 }
 
 export interface HeroPackage {
@@ -168,6 +207,15 @@ export interface HeroSectionSettings {
   socialProof?: HeroSocialProof | null;
   // ── Media ─────────────────────────────────────────────────────────────────
   gallery?: string[];
+  /** Single hero image URL (layout editor). AI-generated configs use gallery[]. */
+  image?: string | null;
+  /** Alt text for the single hero image. */
+  imageAlt?: string | null;
+  /**
+   * Presentation frame applied to all hero gallery images (including image).
+   * Null = renderer defaults (cover, no zoom/offset).
+   */
+  imageFrame?: ImageFrame | null;
   videoUrl?: string | null;
   // ── CTAs ──────────────────────────────────────────────────────────────────
   primaryCtaLabel?: string | null;
@@ -192,6 +240,8 @@ export interface Testimonial {
   authorName?: string | null;
   authorHandle?: string | null;
   avatarUrl?: string | null;
+  /** Presentation frame for avatarUrl. Null = renderer defaults (cover). */
+  avatarFrame?: ImageFrame | null;
   rating?: number | null;
   location?: string | null;
   verifiedPurchase?: boolean | null;
@@ -247,6 +297,8 @@ export interface ExpertSectionSettings {
   videoUrl?: string | null;
   expertName?: string | null;
   expertAvatarUrl?: string | null;
+  /** Presentation frame for expertAvatarUrl. Null = renderer defaults. */
+  expertImageFrame?: ImageFrame | null;
 }
 
 export interface ComparisonRow {
@@ -257,9 +309,19 @@ export interface ComparisonRow {
 
 export interface ComparisonSectionSettings {
   title?: string | null;
+  /** @deprecated Legacy — not part of canonical contract. */
   productColumnLabel?: string | null;
+  /** @deprecated Legacy — not part of canonical contract. */
   competitorColumnLabel?: string | null;
   rows?: ComparisonRow[];
+  /** Our product image URL. Falls back to first HERO gallery image when absent. */
+  ourProductImage?: string | null;
+  /** Presentation frame for ourProductImage. Null = renderer defaults. */
+  ourProductImageFrame?: ImageFrame | null;
+  /** Competitor / alternative product image URL (optional). */
+  comparedProductImage?: string | null;
+  /** Presentation frame for comparedProductImage. Null = renderer defaults. */
+  comparedProductImageFrame?: ImageFrame | null;
 }
 
 export interface BenefitItem {
@@ -278,6 +340,15 @@ export interface StorySectionSettings {
   title?: string | null;
   description?: string | null;
   media?: string | null;
+  /** Presentation frame for media. Null = renderer defaults. */
+  mediaFrame?: ImageFrame | null;
+  body?: string | null;
+  /** Ordered list of story paragraphs (heading + body). 2–4 items recommended. */
+  paragraphs?: StoryParagraph[];
+}
+
+export interface StoryParagraph {
+  heading?: string | null;
   body?: string | null;
 }
 
