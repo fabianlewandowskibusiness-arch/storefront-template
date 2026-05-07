@@ -128,6 +128,19 @@ export default async function StorefrontLayout({
   const themeVars = buildThemeVariables(config.theme);
 
   const announcementItems = extractAnnouncementItems(config);
+
+  // Derive the sticky header CTA label from the same Expert section resolver.
+  // The resolver already respects the priority chain: explicit expertCtaText →
+  // heuristic (expertRole / title) → generic fallback.
+  // HeaderCtaStrip renders its own 👉 prefix, so we strip it here.
+  const homePage = config.pages.find((p) => p.type === "HOME") ?? config.pages[0];
+  const rawHeaderCta = homePage
+    ? deriveExpertAnnouncementCta(homePage.sections)
+    : null;
+  const headerCtaLabel = rawHeaderCta
+    ? rawHeaderCta.replace(/^👉\s*/, "")
+    : undefined;
+
   const commerce = createCommerceProvider(config.commerce);
   const checkoutUrl = commerce?.getCheckoutUrl() ?? "#offer";
 
@@ -144,6 +157,7 @@ export default async function StorefrontLayout({
       <StorefrontChrome
         branding={config.branding}
         announcementItems={announcementItems}
+        headerCtaLabel={headerCtaLabel}
         checkoutUrl={checkoutUrl}
         storeId={storeId}
         apiUrl={apiUrl}

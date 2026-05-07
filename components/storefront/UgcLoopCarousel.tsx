@@ -8,6 +8,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import StarRating from "@/components/storefront/StarRating";
+import type { ImageFrame } from "@/types/storefront";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -16,6 +17,36 @@ export interface UgcMedia {
   type: "image" | "video";
   poster?: string;
   alt?: string;
+  /** Optional per-image presentation frame (zoom / pan / fit). */
+  frame?: ImageFrame | null;
+}
+
+// ── Frame CSS helper ──────────────────────────────────────────────────────────
+
+function buildCoverFrameStyle(
+  frame: ImageFrame | null | undefined,
+): React.CSSProperties {
+  // No frame → standard full-bleed cover (default UGC look).
+  if (!frame) {
+    return { width: "100%", height: "100%", objectFit: "cover" as const };
+  }
+  if (frame.fit === "contain") {
+    // Contain mode: the outer wrapper must become a flex centering box.
+    // (See below — we handle this case separately in the JSX.)
+    return { maxWidth: "100%", maxHeight: "100%", objectFit: "contain" as const };
+  }
+  // Cover mode with optional zoom / pan.
+  const zoom    = frame.zoom    ?? 1;
+  const offsetX = frame.offsetX ?? 0;
+  const offsetY = frame.offsetY ?? 0;
+  return {
+    position: "absolute" as const,
+    width:    `${zoom * 100}%`,
+    height:   `${zoom * 100}%`,
+    left:     `${(1 - zoom) * 50 + offsetX}%`,
+    top:      `${(1 - zoom) * 50 + offsetY}%`,
+    objectFit: "cover" as const,
+  };
 }
 
 export interface UgcReview {
@@ -309,14 +340,28 @@ function Card({ review, videoRef, roleListItem }: CardProps) {
               className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
               aria-label={media.alt || `Opinia od ${name}`}
             />
+          ) : media.frame?.fit === "contain" ? (
+            /* Contain mode — letterbox the image inside the frame */
+            <div className="absolute inset-0 flex items-center justify-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={media.url}
+                alt={media.alt || `Opinia od ${name}`}
+                loading="lazy"
+                draggable={false}
+                style={buildCoverFrameStyle(media.frame)}
+              />
+            </div>
           ) : (
+            /* Cover mode — may have zoom/pan offsets from ImageFrame */
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={media.url}
               alt={media.alt || `Opinia od ${name}`}
               loading="lazy"
               draggable={false}
-              className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+              style={buildCoverFrameStyle(media.frame)}
+              className="transition-transform duration-500 ease-out group-hover:scale-105"
             />
           )
         ) : (

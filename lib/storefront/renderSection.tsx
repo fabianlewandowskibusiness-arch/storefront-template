@@ -393,6 +393,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
         caption?: string;
         rating?: number;
         location?: string;
+        imageFrame?: ImageFrame | null;
       };
       const reviews = arr<UgcItm>(data, "items")
         .map((item, i) => ({
@@ -401,6 +402,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
             url: item.videoUrl || item.imageUrl || "",
             type: (item.videoUrl ? "video" : "image") as "image" | "video",
             alt: item.authorName || undefined,
+            frame: item.imageFrame ?? null,
           },
           quote: item.caption || "",
           name: item.authorName || "",

@@ -299,6 +299,13 @@ export interface ExpertSectionSettings {
   expertAvatarUrl?: string | null;
   /** Presentation frame for expertAvatarUrl. Null = renderer defaults. */
   expertImageFrame?: ImageFrame | null;
+  /**
+   * Explicit CTA text for the announcement strip and header CTA strip.
+   * When non-empty, overrides heuristic derivation from expertRole / title.
+   * Set by the store editor; AI generation leaves this null.
+   * E.g. "Zobacz opinię fizjoterapeutki" (without the 👉 prefix).
+   */
+  expertCtaText?: string | null;
 }
 
 export interface ComparisonRow {
