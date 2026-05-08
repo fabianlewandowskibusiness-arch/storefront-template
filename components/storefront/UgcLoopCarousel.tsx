@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
+  type SyntheticEvent,
 } from "react";
 import StarRating from "@/components/storefront/StarRating";
 import type { ImageFrame } from "@/types/storefront";
@@ -354,21 +355,31 @@ function Card({ review, videoRef, roleListItem }: CardProps) {
   const hasMedia = !!media.url;
 
   /**
-   * Natural image dimensions — null until the img fires onLoad.
-   * Once known, the AR-aware cover formula gives correct per-axis pan range.
+   * Natural image dimensions — null until readable (handles cached images too).
    */
   const [imageDims, setImageDims] = useState<{ w: number; h: number } | null>(null);
+  const coverImgRef = useRef<HTMLImageElement>(null);
 
-  const onImgLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  // Read dims for both cached (complete on mount) and lazy-loaded images.
+  useEffect(() => {
+    setImageDims(null); // reset on URL change
+    const el = coverImgRef.current;
+    if (el && el.complete && el.naturalWidth > 0 && el.naturalHeight > 0) {
+      setImageDims({ w: el.naturalWidth, h: el.naturalHeight });
+    }
+  }, [media.url]);
+
+  const onImgLoad = (e: SyntheticEvent<HTMLImageElement>) => {
     const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
     if (w > 0 && h > 0) setImageDims({ w, h });
   };
 
-  // Cover style: AR-aware when dims are known, legacy fallback otherwise.
+  // Safe fallback when dims unknown: centred objectFit:cover, no offsets.
+  // This prevents background exposure from stored non-zero offsets on first render.
   const coverStyle: React.CSSProperties =
     imageDims && imageDims.w > 0 && imageDims.h > 0
       ? buildCoverFrameStyleAR(media.frame, imageDims.w / imageDims.h)
-      : buildCoverFrameStyleLegacy(media.frame);
+      : { position: "absolute", width: "100%", height: "100%", objectFit: "cover" };
 
   return (
     <figure
@@ -407,6 +418,7 @@ function Card({ review, videoRef, roleListItem }: CardProps) {
             /* Cover mode — AR-aware zoom/pan offsets from ImageFrame */
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
+              ref={coverImgRef}
               src={media.url}
               alt={media.alt || `Opinia od ${name}`}
               loading="lazy"

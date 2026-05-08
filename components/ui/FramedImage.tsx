@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ImageFrame } from "@/types/storefront";
 
 // ── FramedImage ────────────────────────────────────────────────────────────────
@@ -15,18 +15,16 @@ import type { ImageFrame } from "@/types/storefront";
  * - `offsetX/Y` default to 0   — centred
  *
  * ### CSS strategy (cover mode)
- * The outer `<div>` is `relative overflow-hidden` at whatever size the caller
- * specifies.  Once the image's natural dimensions are known (via onLoad), the
- * inner img is sized to match the image's own aspect ratio scaled to cover the
- * container (aspect-ratio-aware cover).  This makes offsetX/Y panning correct
- * on each axis independently.
+ * The outer `<div>` is `relative overflow-hidden`.  Once the image's natural
+ * dimensions are known, the inner img is sized to match the image's own aspect
+ * ratio scaled to cover the container (aspect-ratio-aware cover), enabling
+ * correct per-axis pan without extra user zoom.
  *
- * While dimensions are loading (or when `frameAR` is not supplied), falls back
- * to a uniform square element + `objectFit:cover` — visually correct for the
- * default (zoom=1, offset=0) frame.
- *
- * For "contain" fit, we fall back to the standard `max-w-full max-h-full`
- * letterboxing approach.
+ * IMPORTANT — cached-image handling:
+ * `onLoad` does NOT fire for images already in the browser cache.  We also
+ * read naturalWidth/naturalHeight in a `useEffect` via a ref so cached images
+ * are handled correctly.  Until dims are known the img falls back to a safe
+ * centred `objectFit:cover` that never exposes the background.
  */
 
 // ── Pure math helpers (inlined — no cross-repo import) ────────────────────────
@@ -43,42 +41,20 @@ function coverCssStyleAR(
   imageAR: number,
   frameAR: number,
 ): React.CSSProperties {
-  // Defensive clamping — guard old/migrated configs with zoom < 1 or
-  // offsets that were valid at a different zoom level.
-  const z      = Math.max(1, zoom);
+  const z        = Math.max(1, zoom);
   const [bw, bh] = coverBaseSize(imageAR, frameAR);
-  const w      = z * bw;
-  const h      = z * bh;
-  const maxX   = Math.max(0, (w / 100 - 1) * 50);
-  const maxY   = Math.max(0, (h / 100 - 1) * 50);
-  const ox     = maxX === 0 ? 0 : Math.max(-maxX, Math.min(maxX, offsetX));
-  const oy     = maxY === 0 ? 0 : Math.max(-maxY, Math.min(maxY, offsetY));
+  const w        = z * bw;
+  const h        = z * bh;
+  const maxX     = Math.max(0, (w / 100 - 1) * 50);
+  const maxY     = Math.max(0, (h / 100 - 1) * 50);
+  const ox       = maxX === 0 ? 0 : Math.max(-maxX, Math.min(maxX, offsetX));
+  const oy       = maxY === 0 ? 0 : Math.max(-maxY, Math.min(maxY, offsetY));
   return {
-    position: "absolute",
-    width:    `${w}%`,
-    height:   `${h}%`,
-    left:     `${(100 - w) / 2 + ox}%`,
-    top:      `${(100 - h) / 2 + oy}%`,
-    objectFit: "cover",
-  };
-}
-
-/** Legacy fallback when image dims are not yet known. */
-function coverCssStyleLegacy(
-  zoom: number,
-  offsetX: number,
-  offsetY: number,
-): React.CSSProperties {
-  const z      = Math.max(1, zoom);
-  const maxOff = (z - 1) * 50;
-  const ox     = maxOff === 0 ? 0 : Math.max(-maxOff, Math.min(maxOff, offsetX));
-  const oy     = maxOff === 0 ? 0 : Math.max(-maxOff, Math.min(maxOff, offsetY));
-  return {
-    position: "absolute",
-    width:    `${z * 100}%`,
-    height:   `${z * 100}%`,
-    left:     `${(1 - z) * 50 + ox}%`,
-    top:      `${(1 - z) * 50 + oy}%`,
+    position:  "absolute",
+    width:     `${w}%`,
+    height:    `${h}%`,
+    left:      `${(100 - w) / 2 + ox}%`,
+    top:       `${(100 - h) / 2 + oy}%`,
     objectFit: "cover",
   };
 }
@@ -93,13 +69,12 @@ interface FramedImageProps {
   className?: string;
   /** Tailwind or inline className applied to the <img> element (contain mode only). */
   imgClassName?: string;
-  /** img sizes attribute for Next.js Image — defaults to "100vw". */
+  /** img sizes attribute — kept for call-site compat, not used internally. */
   sizes?: string;
   priority?: boolean;
   /**
    * Aspect ratio of the container (containerWidth / containerHeight, e.g. 4/5 = 0.8).
-   * When provided, enables aspect-ratio-aware cover math so the pan range is
-   * correct per-axis.  When omitted, falls back to legacy uniform-scale formula.
+   * Required for AR-aware cover.  When omitted, falls back to centred objectFit:cover.
    */
   frameAR?: number;
 }
@@ -110,8 +85,6 @@ export function FramedImage({
   frame,
   className = "",
   imgClassName = "",
-  // sizes and priority are kept in the interface for call-site compatibility
-  // but are not used — we use a plain <img> for full CSS control.
   frameAR,
 }: FramedImageProps) {
   const fit     = frame?.fit     ?? "cover";
@@ -120,6 +93,18 @@ export function FramedImage({
   const offsetY = frame?.offsetY ?? 0;
 
   const [imageDims, setImageDims] = useState<{ w: number; h: number } | null>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  // Read natural dimensions — handles both cached (complete=true on mount) and
+  // lazy-loaded images.  onLoad on the img element handles the lazy case;
+  // this effect handles images already in the browser cache.
+  useEffect(() => {
+    setImageDims(null); // reset when src changes
+    const el = imgRef.current;
+    if (el && el.complete && el.naturalWidth > 0 && el.naturalHeight > 0) {
+      setImageDims({ w: el.naturalWidth, h: el.naturalHeight });
+    }
+  }, [src]);
 
   // ── contain mode: standard letterboxing — zoom/pan disabled ──────────────
   if (fit === "contain") {
@@ -137,20 +122,20 @@ export function FramedImage({
 
   // ── cover mode ────────────────────────────────────────────────────────────
   //
-  // When the image's natural dimensions and the frame's aspect ratio are both
-  // known, use the AR-aware formula.  Otherwise fall back to the legacy
-  // square-element formula (correct for default offset=0 frames).
-  const useAR = imageDims && frameAR != null && imageDims.w > 0 && imageDims.h > 0;
-  const imageAR = useAR ? imageDims!.w / imageDims!.h : 1;
+  // Safe fallback when dims are unknown: centred objectFit:cover with no
+  // offsets — never exposes the container background regardless of stored
+  // offsetX/Y values.
+  const canUseAR = imageDims != null && frameAR != null;
 
-  const imgStyle: React.CSSProperties = useAR
-    ? coverCssStyleAR(zoom, offsetX, offsetY, imageAR, frameAR!)
-    : coverCssStyleLegacy(zoom, offsetX, offsetY);
+  const imgStyle: React.CSSProperties = canUseAR
+    ? coverCssStyleAR(zoom, offsetX, offsetY, imageDims!.w / imageDims!.h, frameAR!)
+    : { position: "absolute", width: "100%", height: "100%", objectFit: "cover" };
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        ref={imgRef}
         src={src}
         alt={alt}
         style={imgStyle}
