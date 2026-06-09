@@ -98,6 +98,24 @@ const pageSchema = z.object({
 // commerce has not been configured yet.  The woocommerce provider handles
 // null via ?? "" fallback at runtime.
 
+// A single structured purchase option. Money is integer minor units (14900 = 149.00).
+// Backend exposes only visible bundles; we still keep `visible` for completeness.
+const offerBundleSchema = z.object({
+  id:             z.string(),
+  label:          z.string().catch(""),
+  quantity:       z.number().catch(1),
+  price:          z.number().catch(0),
+  currency:       z.string().catch("PLN"),
+  compareAtPrice: z.number().nullable().optional(),
+  savingsLabel:   z.string().nullable().optional(),
+  badge:          z.string().nullable().optional(),
+  isDefault:      z.boolean().catch(false),
+  visible:        z.boolean().catch(true),
+  bundleMode:     z.string().catch("VARIATION"),
+  wooProductId:   z.string().nullable().optional(),
+  wooVariationId: z.string().nullable().optional(),
+});
+
 const commerceSchema = z.object({
   provider:       z.string().catch("woocommerce"),
   storeUrl:       z.string().nullable().default(""),
@@ -114,6 +132,12 @@ const commerceSchema = z.object({
   // "full bridge mode" to the storefront checkout flow. Absent / null
   // means URL-only (degraded) mode.
   pluginHandoffUrl: z.string().nullable().optional(),
+  // Whether the Cart Bridge is connected. Absent (legacy) → treated as connected,
+  // so existing storefronts keep working; only the bundle path enforces it.
+  connected:      z.boolean().catch(true),
+  // Structured purchase options. When present + non-empty they take precedence
+  // over legacy hero packages. Absent/empty → legacy single-product behaviour.
+  offerBundles:   z.array(offerBundleSchema).catch([]).default([]),
 });
 
 // ── Analytics ─────────────────────────────────────────────────────────────────

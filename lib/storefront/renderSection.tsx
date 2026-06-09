@@ -7,6 +7,7 @@ import type {
   ImageFrame,
 } from "@/types/storefront";
 import type { ShellOverride } from "@/components/layout/SectionShell";
+import { mapOfferBundlesToPackages } from "@/lib/storefront/offerBundles";
 import HeroSection from "@/components/sections/HeroSection";
 import TrustBarSection from "@/components/sections/TrustBarSection";
 import BenefitsSection from "@/components/sections/BenefitsSection";
@@ -137,7 +138,7 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
         productId?: string;
         variationId?: string;
       };
-      const packages: HeroPackage[] = arr<PkgOpt>(data, "packages").map(
+      const legacyPackages: HeroPackage[] = arr<PkgOpt>(data, "packages").map(
         (pkg, i) => ({
           id: `pkg-${i}`,
           label: pkg.name ?? "",
@@ -154,6 +155,15 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
           variationId: pkg.variationId || ctx.commerce?.variationId || undefined,
         }),
       );
+
+      // commerce.offerBundles is the commerce-level source of truth. When present
+      // and non-empty it takes precedence over the legacy hero packages, so the
+      // displayed price AND the WooCommerce mapping come from the same bundle.
+      const commerceBundles = ctx.commerce?.offerBundles ?? [];
+      const bundlesFromCommerce = commerceBundles.length > 0;
+      const packages: HeroPackage[] = bundlesFromCommerce
+        ? mapOfferBundlesToPackages(commerceBundles)
+        : legacyPackages;
 
       const bullets = arr<string>(data, "bullets");
 
@@ -184,6 +194,8 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
           }
           currency={ctx.currency}
           productName={ctx.branding.productName}
+          bundlesFromCommerce={bundlesFromCommerce}
+          commerceConnected={ctx.commerce?.connected ?? true}
         />
       );
     }
@@ -240,9 +252,11 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
 
     // ── COMPARISON ───────────────────────────────────────────────────────────
     // Canonical: data.title, data.subtitle,
+    //            data.ourProductLabel, data.comparedProductLabel
     //            data.rows — { feature, productValue, competitorValue }[]
     //            data.ourProductImage      — our product image (optional, falls back to heroImage)
     //            data.comparedProductImage — competitor product image (optional)
+    // Legacy: productColumnLabel → ourProductLabel, competitorColumnLabel → comparedProductLabel
     // renderSection maps backend field names → component prop names
     case "COMPARISON": {
       type CompRow = {
@@ -261,12 +275,23 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
       const comparedImage = s(data, "comparedProductImage") || undefined;
       const ourProductImageFrame = (data.ourProductImageFrame as ImageFrame | null) ?? null;
       const comparedProductImageFrame = (data.comparedProductImageFrame as ImageFrame | null) ?? null;
+      // Label precedence: new field → legacy field → component default
+      const ourProductLabel =
+        s(data, "ourProductLabel") ||
+        s(data, "productColumnLabel") ||
+        undefined;
+      const comparedProductLabel =
+        s(data, "comparedProductLabel") ||
+        s(data, "competitorColumnLabel") ||
+        undefined;
       return (
         <ComparisonSection
           key={section.id}
           title={s(data, "title")}
           subtitle={s(data, "subtitle") || undefined}
           brandName={ctx.branding.productName}
+          ourProductLabel={ourProductLabel || undefined}
+          comparedProductLabel={comparedProductLabel || undefined}
           productImage={ourImage}
           productImageFrame={ourProductImageFrame}
           comparedProductImage={comparedImage}

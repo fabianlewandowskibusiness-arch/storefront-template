@@ -108,6 +108,33 @@ export interface HeroPackage {
   productId?: string;
   /** Backend variation ID — forwarded to cart handoff for WooCommerce matching. */
   variationId?: string;
+  /** When true, this option is pre-selected (independent of the bestseller ribbon). */
+  defaultSelected?: boolean;
+  /** False when the bundle (commerce.offerBundles) lacks its required WooCommerce mapping. */
+  mappingValid?: boolean;
+  /** Bundle mode when sourced from commerce.offerBundles: VARIATION | SEPARATE_PRODUCT | QUANTITY. */
+  bundleMode?: string;
+}
+
+/**
+ * A structured purchase option from commerce config. Source of truth for both
+ * the displayed price and the WooCommerce mapping. Money is integer minor units.
+ * Mirrors the backend `OfferBundlePublicDto`.
+ */
+export interface OfferBundle {
+  id: string;
+  label: string;
+  quantity: number;
+  price: number;
+  currency: string;
+  compareAtPrice?: number | null;
+  savingsLabel?: string | null;
+  badge?: string | null;
+  isDefault: boolean;
+  visible: boolean;
+  bundleMode: string;
+  wooProductId?: string | null;
+  wooVariationId?: string | null;
 }
 
 // ── Typed section settings ─────────────────────────────────────────────────────
@@ -449,6 +476,17 @@ export interface CommerceConfig {
    * Absent / null means URL-only (degraded) mode.
    */
   pluginHandoffUrl?: string | null;
+  /**
+   * Whether the WooCommerce Cart Bridge is connected. When false, the hero
+   * renders bundles but disables real checkout and shows a preview notice.
+   * Absent (legacy configs) is treated as connected so existing stores are unaffected.
+   */
+  connected?: boolean;
+  /**
+   * Structured purchase options. When present and non-empty, these take
+   * precedence over legacy hero `section.data.packages`.
+   */
+  offerBundles?: OfferBundle[];
 }
 
 export interface AnalyticsConfig {

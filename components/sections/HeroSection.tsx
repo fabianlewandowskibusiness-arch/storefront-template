@@ -30,6 +30,10 @@ interface HeroSectionProps {
   fallbackCtaLabel: string;
   currency: string;
   productName: string;
+  /** True when packages come from commerce.offerBundles (enables connected/mapping guards). */
+  bundlesFromCommerce?: boolean;
+  /** Whether the WooCommerce Cart Bridge is connected. Only enforced for the bundle path. */
+  commerceConnected?: boolean;
 }
 
 export default function HeroSection({
@@ -49,17 +53,34 @@ export default function HeroSection({
   fallbackCtaLabel,
   currency,
   productName,
+  bundlesFromCommerce = false,
+  commerceConnected = true,
 }: HeroSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const addToCart = useUiStore((s) => s.addToCart);
   const openCart = useUiStore((s) => s.openCart);
   const showToast = useUiStore((s) => s.showToast);
 
-  // Default selection: bestseller package, otherwise the first one.
+  // Default selection: explicit default (commerce bundles) → bestseller → first.
   const initialId =
-    packages.find((p) => p.isBestseller)?.id ?? packages[0]?.id ?? "";
+    packages.find((p) => p.defaultSelected)?.id ??
+    packages.find((p) => p.isBestseller)?.id ??
+    packages[0]?.id ??
+    "";
   const [selectedId, setSelectedId] = useState(initialId);
   const selectedPkg = packages.find((p) => p.id === selectedId);
+
+  // Checkout guards — only enforced when packages come from commerce.offerBundles,
+  // so legacy single-product storefronts keep their existing behaviour.
+  const notConnected = bundlesFromCommerce && commerceConnected === false;
+  const selectedInvalidMapping =
+    bundlesFromCommerce && selectedPkg?.mappingValid === false;
+  const checkoutBlocked = notConnected || selectedInvalidMapping;
+  const blockNotice = notConnected
+    ? "Checkout nie jest jeszcze połączony z WooCommerce."
+    : selectedInvalidMapping
+      ? "Ten zestaw nie ma jeszcze skonfigurowanego mapowania WooCommerce."
+      : null;
 
   // CTA resolution: per-package URL beats the global checkout URL.
   // CTA label includes the live price of the selected package.
@@ -75,6 +96,13 @@ export default function HeroSection({
   function handleCtaClick(e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) {
     trackHeroCtaClick(ctaLabel, ctaHref);
     if (!selectedPkg) return;
+
+    // Bundle path: never start checkout (no handoff) when not connected or the
+    // selected bundle is missing its WooCommerce mapping. Just surface the notice.
+    if (checkoutBlocked) {
+      e.preventDefault();
+      return;
+    }
 
     e.preventDefault();
     trackBeginCheckout(productName, selectedPkg.price, currency);
@@ -198,18 +226,42 @@ export default function HeroSection({
                 </div>
               )}
 
-              {/* Primary CTA — large, full-width, price-aware, subtly pulsing */}
+              {/* Primary CTA — large, full-width, price-aware, subtly pulsing.
+                  When checkout is blocked (not connected / missing bundle mapping)
+                  we drop the href so it renders as a disabled <button> that cannot
+                  navigate, and the onClick guard suppresses the handoff. */}
               <div className="mt-5">
                 <Button
                   variant="primary"
                   size="lg"
-                  href={ctaHref}
+                  href={checkoutBlocked ? undefined : ctaHref}
                   onClick={handleCtaClick}
-                  className="w-full text-base md:text-lg py-4 cta-pulse"
+                  disabled={checkoutBlocked}
+                  aria-disabled={checkoutBlocked}
+                  className={`w-full text-base md:text-lg py-4 ${
+                    checkoutBlocked ? "opacity-50 pointer-events-none" : "cta-pulse"
+                  }`}
                 >
                   {ctaLabel}
                 </Button>
               </div>
+
+              {/* Preview / mapping notice — shown only on the commerce-bundle path */}
+              {blockNotice && (
+                <p
+                  role="status"
+                  className="mt-2.5 flex items-center justify-center gap-1.5 text-center text-xs font-medium text-[var(--color-warning)]"
+                >
+                  <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {blockNotice}
+                </p>
+              )}
 
               {/* Social proof line — dynamic, rotates */}
               <div className="mt-2.5 text-center">
@@ -286,8 +338,9 @@ export default function HeroSection({
         </Container>
       </section>
 
-      {/* Sticky mobile buy bar — appears once the hero scrolls out of view */}
-      {selectedPkg && (
+      {/* Sticky mobile buy bar — appears once the hero scrolls out of view.
+          Hidden when checkout is blocked (not connected / missing bundle mapping). */}
+      {selectedPkg && !checkoutBlocked && (
         <MobileBuyBar
           triggerRef={sectionRef}
           packageLabel={selectedPkg.label}

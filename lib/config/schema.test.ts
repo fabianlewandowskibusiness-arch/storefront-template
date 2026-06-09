@@ -29,6 +29,48 @@ function parseFail(input: unknown): void {
   expect(result.success, "Expected parse to fail but it succeeded").toBe(false);
 }
 
+// ── Commerce offer bundles ──────────────────────────────────────────────────────
+
+describe("commerce offerBundles", () => {
+  it("defaults: connected=true and offerBundles=[] when omitted", () => {
+    const config = parseOk(minimalConfig({ commerce: { productId: "1" } }));
+    expect(config.commerce?.connected).toBe(true);
+    expect(config.commerce?.offerBundles).toEqual([]);
+  });
+
+  it("parses connected=false and a typed offerBundles array", () => {
+    const config = parseOk(
+      minimalConfig({
+        commerce: {
+          productId: "1",
+          connected: false,
+          offerBundles: [
+            {
+              id: "x2",
+              label: "Zestaw 2 szt.",
+              quantity: 1,
+              price: 27900,
+              currency: "PLN",
+              compareAtPrice: 29800,
+              isDefault: true,
+              visible: true,
+              bundleMode: "VARIATION",
+              wooProductId: "123",
+              wooVariationId: "457",
+            },
+          ],
+        },
+      }),
+    );
+    expect(config.commerce?.connected).toBe(false);
+    expect(config.commerce?.offerBundles).toHaveLength(1);
+    const b = config.commerce!.offerBundles![0];
+    expect(b.bundleMode).toBe("VARIATION");
+    expect(b.price).toBe(27900); // minor units preserved by schema
+    expect(b.wooVariationId).toBe("457");
+  });
+});
+
 // ── Minimal valid config ───────────────────────────────────────────────────────
 
 describe("minimal config", () => {

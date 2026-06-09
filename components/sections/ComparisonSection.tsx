@@ -15,6 +15,10 @@ interface ComparisonSectionProps {
   title: string;
   subtitle?: string;
   brandName: string;
+  /** Left card badge label — data-driven from ourProductLabel. Fallback: "Twój wybór". */
+  ourProductLabel?: string;
+  /** Right card badge label — data-driven from comparedProductLabel. Fallback: "Alternatywa". */
+  comparedProductLabel?: string;
   rows: ComparisonRow[];
   /** Our product image URL — shown in the left (recommended) card. */
   productImage?: string;
@@ -127,6 +131,8 @@ export default function ComparisonSection({
   title,
   subtitle,
   brandName,
+  ourProductLabel,
+  comparedProductLabel,
   rows,
   productImage,
   productImageFrame,
@@ -158,7 +164,7 @@ export default function ComparisonSection({
             >
               {/* Ribbon badge */}
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 text-[10px] font-bold uppercase tracking-wider bg-[var(--color-accent)] text-white rounded-full shadow-md">
-                Twój wybór
+                {ourProductLabel?.trim() || "Twój wybór"}
               </span>
 
               {/* Product image slot */}
@@ -204,7 +210,7 @@ export default function ComparisonSection({
             >
               {/* Muted badge */}
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 text-[10px] font-bold uppercase tracking-wider bg-[var(--color-text-muted)] text-white rounded-full">
-                Typowe poduszki
+                {comparedProductLabel?.trim() || "Alternatywa"}
               </span>
 
               {/* Image slot — shows compared product image when provided;
@@ -249,7 +255,7 @@ export default function ComparisonSection({
 
               {/* Column title */}
               <h3 className="text-xl md:text-2xl font-semibold text-[var(--color-text-muted)] text-center mb-5">
-                Konkurencja
+                {comparedProductLabel?.trim() || "Alternatywa"}
               </h3>
 
               {/* Problem list */}
