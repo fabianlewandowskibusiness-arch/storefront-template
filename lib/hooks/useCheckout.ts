@@ -8,9 +8,9 @@ import {
   selectCartSubtotal,
   selectCartCurrency,
   useUiStore,
-  type CartItem,
 } from "@/lib/stores/uiStore";
-import type { CartHandoffLine, CartHandoffRequest, CartHandoffResponse } from "@/lib/commerce/types";
+import type { CartHandoffRequest, CartHandoffResponse } from "@/lib/commerce/types";
+import { toHandoffLines } from "@/lib/commerce/handoff";
 
 // ── Options ──────────────────────────────────────────────────────────────────
 
@@ -66,14 +66,6 @@ const NOT_CONFIGURED_ERROR =
   "Checkout niedostępny — integracja WooCommerce nie jest skonfigurowana. Skontaktuj się z administratorem sklepu.";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function toHandoffLines(items: CartItem[]): CartHandoffLine[] {
-  return items.map((item) => ({
-    productId: item.productId,
-    variationId: item.variantId,
-    quantity: item.quantity,
-  }));
-}
 
 async function fetchHandoff(
   handoffUrl: string,

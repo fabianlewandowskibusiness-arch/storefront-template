@@ -147,7 +147,12 @@ export function renderSection(section: StorefrontSection, ctx: RenderContext) {
           comparePrice: pkg.compareAtPrice || undefined,
           savings: pkg.savingsText || undefined,
           isBestseller: pkg.label === "BESTSELLER",
-          badge: pkg.badge || pkg.label || undefined,
+          // Legacy packages: preserve historical rendering. Previously only the
+          // BESTSELLER tag surfaced a ribbon (badge gated on isBestseller).
+          // PackageSelector now renders ANY present badge, so gate the legacy
+          // badge on the bestseller tag to avoid newly showing other label tags
+          // on existing storefronts.
+          badge: pkg.label === "BESTSELLER" ? pkg.badge || pkg.label : undefined,
           ctaHref: pkg.ctaHref || undefined,
           // Backend product/variation IDs — forwarded all the way to the
           // cart state so the handoff endpoint can match WooCommerce items.
