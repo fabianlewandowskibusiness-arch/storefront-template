@@ -118,8 +118,8 @@ export default function TestimonialsCarousel({
               key={i}
               className={`snap-center shrink-0 w-[85%] sm:w-[60%] md:w-[48%] lg:w-[44%] bg-[var(--color-background)] border rounded-[var(--radius)] p-6 transition-all duration-300 ${
                 isActive
-                  ? "border-[var(--color-accent)] shadow-lg scale-100"
-                  : "border-[var(--color-border)] shadow-[var(--shadow)] scale-[0.97] opacity-80"
+                  ? "border-[var(--color-accent)] shadow-lg ring-1 ring-[var(--color-accent)]/10 scale-100"
+                  : "border-[var(--color-border)] shadow-[var(--shadow)] scale-[0.97] opacity-75"
               }`}
             >
               <div className="flex items-center gap-4 mb-4">
@@ -162,8 +162,15 @@ export default function TestimonialsCarousel({
                 </div>
               </div>
 
+              {/* Decorative quote mark — subtle, accent-tinted */}
+              <span
+                aria-hidden="true"
+                className="block font-serif text-4xl leading-none text-[var(--color-accent)]/25 -mb-2"
+              >
+                &ldquo;
+              </span>
               <p className="text-sm md:text-base text-[var(--color-text)] leading-relaxed">
-                &ldquo;{item.quote}&rdquo;
+                {item.quote}
               </p>
             </article>
           );

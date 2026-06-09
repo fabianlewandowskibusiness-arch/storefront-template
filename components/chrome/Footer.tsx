@@ -1,6 +1,3 @@
-"use client";
-
-import { useSectionRegistry } from "@/lib/stores/sectionRegistry";
 import Container from "@/components/layout/Container";
 import type {
   BrandingConfig,
@@ -33,38 +30,37 @@ function getEnabledLegalPages(lp?: LegalPagesConfig | null): LegalPageEntry[] {
 }
 
 /**
- * Global site footer with three columns:
+ * Global site footer — intentionally compact and premium.
  *
- *   1. Brand — store name + copyright
- *   2. Navigation — scroll links to page sections (from sectionRegistry)
- *   3. Legal — dynamic links from `legalPages` config
+ *   1. Brand — store name, short description (tagline), contact email
+ *   2. "Informacje" — dynamic legal/info links from `legalPages` config
  *
- * Rendered at the very bottom of the storefront layout, below all page
- * content. This is a client component because it reads the section
- * registry via Zustand.
+ * Section navigation is NOT duplicated here: the header nav and the mobile
+ * NavigationDrawer already provide section anchors from the same section
+ * registry, so the footer stays clean instead of reading like a generated
+ * sitemap. When there are no legal/info links the second column is omitted,
+ * leaving just the brand block (no empty columns).
+ *
+ * Pure presentational component — no client state, so it can render on the server.
  */
 export default function Footer({ branding, legalPages, contactEmail }: FooterProps) {
-  const sections = useSectionRegistry((s) => s.sections);
-  const sortedSections = [...sections].sort((a, b) => a.order - b.order);
   const legalEntries = getEnabledLegalPages(legalPages);
   const year = new Date().getFullYear();
-
-  function scrollTo(id: string) {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+  const hasInfo = legalEntries.length > 0;
 
   return (
     <footer className="bg-[var(--color-primary)] text-white/80 pt-12 pb-8">
       <Container>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-16">
-          {/* ── Column 1: Brand ── */}
+        <div
+          className={`grid grid-cols-1 gap-10 ${hasInfo ? "sm:grid-cols-2 sm:gap-16" : ""}`}
+        >
+          {/* ── Brand ── */}
           <div>
             <p className="text-white font-extrabold text-base uppercase tracking-tight">
               {branding.storeName}
             </p>
             {branding.tagline && (
-              <p className="mt-2 text-sm leading-relaxed text-white/60 max-w-[260px]">
+              <p className="mt-2 text-sm leading-relaxed text-white/60 max-w-[320px]">
                 {branding.tagline}
               </p>
             )}
@@ -78,31 +74,9 @@ export default function Footer({ branding, legalPages, contactEmail }: FooterPro
             )}
           </div>
 
-          {/* ── Column 2: Section navigation ── */}
-          {sortedSections.length > 0 && (
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-white/40 mb-4">
-                Nawigacja
-              </h3>
-              <ul className="space-y-2.5">
-                {sortedSections.slice(0, 8).map((entry) => (
-                  <li key={entry.id}>
-                    <button
-                      type="button"
-                      onClick={() => scrollTo(entry.id)}
-                      className="text-sm text-white/70 hover:text-white transition-colors focus:outline-none"
-                    >
-                      {entry.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* ── Column 3: Legal links ── */}
-          {legalEntries.length > 0 && (
-            <div>
+          {/* ── Informacje (legal / info links) — omitted entirely when empty ── */}
+          {hasInfo && (
+            <div className="sm:justify-self-end">
               <h3 className="text-xs font-bold uppercase tracking-wider text-white/40 mb-4">
                 Informacje
               </h3>
