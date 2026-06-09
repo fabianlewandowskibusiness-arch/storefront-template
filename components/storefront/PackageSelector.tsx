@@ -36,9 +36,16 @@ export default function PackageSelector({
                 : "border-[var(--color-border)] bg-[var(--color-background)] hover:border-[var(--color-accent)]/40 hover:shadow-sm"
             }`}
           >
-            {pkg.isBestseller && (
-              <span className="absolute -top-2.5 right-4 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-[var(--color-accent)] text-white rounded">
-                {pkg.badge || "Bestseller"}
+            {/* Marketing badge — rendered per card whenever the package has one.
+                Independent of selected / default state: every option can show its
+                own badge (e.g. "BESTSELLER" on one, "MAKSYMALNA OSZCZĘDNOŚĆ" on
+                another). Capped width + truncate keeps long labels inside the card. */}
+            {pkg.badge && (
+              <span
+                title={pkg.badge}
+                className="absolute -top-2.5 right-4 z-10 inline-block max-w-[calc(100%-2rem)] truncate rounded bg-[var(--color-accent)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm"
+              >
+                {pkg.badge}
               </span>
             )}
 

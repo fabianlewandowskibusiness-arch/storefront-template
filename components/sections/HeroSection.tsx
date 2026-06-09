@@ -116,6 +116,11 @@ export default function HeroSection({
       comparePrice: selectedPkg.comparePrice,
       currency,
       image: gallery[0]?.url,
+      // Commerce bundles carry their own handoff quantity (e.g. VARIATION pack of
+      // 2/3 units) — propagate it so the cart line, and thus the WooCommerce
+      // handoff, uses the selected bundle's quantity. Legacy packages keep the
+      // default of 1 (their quantity was only a display hint).
+      quantity: bundlesFromCommerce ? selectedPkg.quantity ?? 1 : undefined,
     });
     showToast("Dodano do koszyka");
     openCart();

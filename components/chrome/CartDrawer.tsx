@@ -9,6 +9,7 @@ import {
   type CartItem,
 } from "@/lib/stores/uiStore";
 import { useCheckout } from "@/lib/hooks/useCheckout";
+import { CHECKOUT_TARGET } from "@/lib/commerce/handoff";
 import Drawer from "./Drawer";
 import { formatPrice } from "@/lib/utils/formatPrice";
 
@@ -46,6 +47,11 @@ export default function CartDrawer({ checkoutUrl, storeId, apiUrl, pluginHandoff
     storeId,
     apiUrl,
     pluginHandoffUrl,
+    // The cart drawer's primary action is "Przejdź do checkoutu" — the main
+    // hero "Kup teraz" funnels here. Always hand off with the CHECKOUT target so
+    // the buyer is taken straight to checkout (the custom checkout URL when set),
+    // never the cart page, regardless of the configured checkoutMode.
+    target: CHECKOUT_TARGET,
   });
 
   function handleRemove(item: CartItem) {

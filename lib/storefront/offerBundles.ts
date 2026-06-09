@@ -36,10 +36,10 @@ export function mapOfferBundlesToPackages(bundles: OfferBundle[]): HeroPackage[]
       price: (b.price ?? 0) / 100,
       comparePrice: b.compareAtPrice != null ? b.compareAtPrice / 100 : undefined,
       savings: b.savingsLabel || undefined,
-      // Ribbon only when the badge explicitly says BESTSELLER — NOT for the default.
-      isBestseller: (b.badge ?? "").toUpperCase() === "BESTSELLER",
-      // Drives the initial selection independently of the bestseller ribbon.
+      // Selection is driven solely by isDefault — NOT by the badge.
       defaultSelected: b.isDefault,
+      // Marketing label, shown per card whenever set. Fully independent of
+      // selection/default: PackageSelector renders any non-empty badge.
       badge: b.badge || undefined,
       // Per-bundle mapping only — never fall back to the global product/variation.
       productId: b.wooProductId || undefined,

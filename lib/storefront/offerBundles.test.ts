@@ -69,15 +69,36 @@ describe("mapOfferBundlesToPackages", () => {
     expect(p.variationId).toBeUndefined();
   });
 
-  it("isDefault drives selection; bestseller ribbon only when badge says so", () => {
+  it("badge renders per bundle, independent of default/selection", () => {
     const [a, b] = mapOfferBundlesToPackages([
-      bundle({ id: "a", isDefault: true, badge: null }),
-      bundle({ id: "b", isDefault: false, badge: "BESTSELLER" }),
+      bundle({ id: "a", isDefault: true, badge: "BESTSELLER" }),
+      bundle({ id: "b", isDefault: false, badge: "MAKSYMALNA OSZCZĘDNOŚĆ" }),
     ]);
+    // Default option keeps its own badge...
     expect(a.defaultSelected).toBe(true);
-    expect(a.isBestseller).toBe(false);
+    expect(a.badge).toBe("BESTSELLER");
+    // ...and a NON-default option also keeps its badge (the original bug).
     expect(b.defaultSelected).toBe(false);
-    expect(b.isBestseller).toBe(true);
+    expect(b.badge).toBe("MAKSYMALNA OSZCZĘDNOŚĆ");
+  });
+
+  it("multiple bundles each keep their distinct badge", () => {
+    const pkgs = mapOfferBundlesToPackages([
+      bundle({ id: "1", badge: "BESTSELLER" }),
+      bundle({ id: "2", badge: "NAJLEPSZA CENA" }),
+      bundle({ id: "3", badge: "MAKSYMALNA OSZCZĘDNOŚĆ" }),
+    ]);
+    expect(pkgs.map((p) => p.badge)).toEqual([
+      "BESTSELLER",
+      "NAJLEPSZA CENA",
+      "MAKSYMALNA OSZCZĘDNOŚĆ",
+    ]);
+  });
+
+  it("default selection does not by itself create a badge", () => {
+    const [p] = mapOfferBundlesToPackages([bundle({ isDefault: true, badge: null })]);
+    expect(p.defaultSelected).toBe(true);
+    expect(p.badge).toBeUndefined();
   });
 
   it("missing required mapping → mappingValid false", () => {
