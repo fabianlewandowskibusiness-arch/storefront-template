@@ -141,10 +141,12 @@ img {
   animation: gallery-fade-in 400ms ease-out;
 }
 
-/* Soft pulse for primary CTA — extremely subtle */
+/* Soft pulse for primary CTA — extremely subtle. The glow is derived from the
+   theme accent colour (via color-mix) so it stays coherent across generated
+   stores instead of the previous hard-coded indigo. */
 @keyframes cta-pulse {
-  0%, 100% { box-shadow: 0 10px 25px -8px rgba(99, 102, 241, 0.45); }
-  50%      { box-shadow: 0 14px 32px -6px rgba(99, 102, 241, 0.65); }
+  0%, 100% { box-shadow: 0 10px 25px -8px color-mix(in srgb, var(--color-accent) 45%, transparent); }
+  50%      { box-shadow: 0 14px 32px -6px color-mix(in srgb, var(--color-accent) 62%, transparent); }
 }
 .cta-pulse {
   animation: cta-pulse 2.4s ease-in-out infinite;

@@ -64,7 +64,7 @@ export default function MobileBuyBar({
 
   return (
     <div
-      className={`md:hidden fixed inset-x-0 bottom-0 z-40 bg-[var(--color-background)] border-t border-[var(--color-border)] shadow-[0_-4px_16px_rgba(0,0,0,0.08)] transition-transform duration-300 ${
+      className={`md:hidden fixed inset-x-0 bottom-0 z-40 bg-[var(--color-background)] border-t border-[var(--color-border)] shadow-[0_-6px_20px_rgba(0,0,0,0.10)] transition-transform duration-300 ${
         visible ? "translate-y-0" : "translate-y-full"
       }`}
       aria-hidden={!visible}
@@ -74,12 +74,12 @@ export default function MobileBuyBar({
           <p className="text-[11px] text-[var(--color-text-muted)] leading-none truncate">
             {packageLabel}
           </p>
-          <div className="flex items-baseline gap-2 mt-0.5">
-            <span className="text-base font-extrabold text-[var(--color-text)] leading-none">
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-lg font-extrabold text-[var(--color-text)] leading-none tabular-nums">
               {formatPrice(price, currency)}
             </span>
             {hasDiscount && (
-              <span className="text-xs text-[var(--color-text-muted)] line-through leading-none">
+              <span className="text-xs text-[var(--color-text-muted)] line-through leading-none tabular-nums">
                 {formatPrice(comparePrice, currency)}
               </span>
             )}
@@ -88,7 +88,7 @@ export default function MobileBuyBar({
         <a
           href={ctaHref}
           onClick={onCtaClick}
-          className="shrink-0 bg-[var(--color-accent)] text-white font-semibold text-sm px-5 py-3 rounded-[var(--radius)] active:brightness-95 shadow-md"
+          className="shrink-0 bg-[var(--color-accent)] text-white font-bold text-sm px-6 py-3.5 rounded-[var(--radius)] shadow-md transition-all active:scale-[0.98] active:brightness-95 hover:brightness-110"
         >
           {ctaLabel}
         </a>

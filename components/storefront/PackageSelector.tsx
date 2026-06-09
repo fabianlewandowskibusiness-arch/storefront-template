@@ -30,10 +30,10 @@ export default function PackageSelector({
             type="button"
             onClick={() => onSelect(pkg.id)}
             aria-pressed={isSelected}
-            className={`w-full text-left relative rounded-[var(--radius)] border-2 p-3.5 md:p-4 transition-all duration-200 ease-out transform-gpu active:scale-[0.99] ${
+            className={`group w-full text-left relative rounded-[var(--radius)] border-2 p-4 transition-all duration-200 ease-out transform-gpu active:scale-[0.99] ${
               isSelected
-                ? "border-[var(--color-accent)] bg-[var(--color-accent-soft)] shadow-lg scale-[1.01]"
-                : "border-[var(--color-border)] bg-[var(--color-background)] hover:border-[var(--color-accent)]/40 hover:shadow-sm"
+                ? "border-[var(--color-accent)] bg-[var(--color-accent-soft)] shadow-md"
+                : "border-[var(--color-border)] bg-[var(--color-background)] hover:border-[var(--color-accent)] hover:-translate-y-0.5 hover:shadow-sm"
             }`}
           >
             {/* Marketing badge — rendered per card whenever the package has one.
@@ -43,22 +43,30 @@ export default function PackageSelector({
             {pkg.badge && (
               <span
                 title={pkg.badge}
-                className="absolute -top-2.5 right-4 z-10 inline-block max-w-[calc(100%-2rem)] truncate rounded bg-[var(--color-accent)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm"
+                className="absolute -top-2.5 right-4 z-10 inline-block max-w-[calc(100%-2rem)] truncate rounded-full bg-[var(--color-accent)] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm"
               >
                 {pkg.badge}
               </span>
             )}
 
             <div className="flex items-center gap-3">
-              {/* Radio circle */}
+              {/* Radio — filled accent circle with a checkmark when selected */}
               <div
                 className={`w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors ${
                   isSelected
                     ? "border-[var(--color-accent)] bg-[var(--color-accent)]"
-                    : "border-[var(--color-border)] bg-transparent"
+                    : "border-[var(--color-border)] bg-transparent group-hover:border-[var(--color-accent)]"
                 }`}
               >
-                {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                {isSelected && (
+                  <svg className="w-3 h-3 text-white" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                )}
               </div>
 
               {/* Label + savings */}
@@ -67,7 +75,7 @@ export default function PackageSelector({
                   {pkg.label}
                 </p>
                 {pkg.savings && (
-                  <p className="text-xs text-[var(--color-success)] font-medium mt-0.5">
+                  <p className="text-xs text-[var(--color-success)] font-semibold mt-0.5">
                     {pkg.savings}
                   </p>
                 )}
@@ -75,11 +83,11 @@ export default function PackageSelector({
 
               {/* Price column */}
               <div className="text-right shrink-0">
-                <p className="font-bold text-base md:text-lg text-[var(--color-text)] leading-tight">
+                <p className="font-extrabold text-base md:text-lg text-[var(--color-text)] leading-tight tabular-nums">
                   {formatPrice(pkg.price, currency)}
                 </p>
                 {hasDiscount && (
-                  <p className="text-xs text-[var(--color-text-muted)] line-through">
+                  <p className="text-xs text-[var(--color-text-muted)] line-through tabular-nums">
                     {formatPrice(pkg.comparePrice!, currency)}
                   </p>
                 )}

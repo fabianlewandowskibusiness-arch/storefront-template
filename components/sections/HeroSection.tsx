@@ -219,23 +219,28 @@ export default function HeroSection({
                 </div>
               )}
 
-              {/* Package selector */}
-              {packages.length > 0 && (
-                <div className="mt-6">
-                  <PackageSelector
-                    packages={packages}
-                    selectedId={selectedId}
-                    onSelect={setSelectedId}
-                    currency={currency}
-                  />
-                </div>
-              )}
+              {/* ── Purchase panel (buy box) ─────────────────────────────────
+                  Groups the buy decision — bundle options, the primary CTA and
+                  the reassurance lines — into one focused, premium-looking panel.
+                  Works with or without bundles: legacy single-product stores get
+                  a clean, focused CTA box. */}
+              <div className="mt-6 rounded-[var(--radius)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm md:p-5">
+                {/* Package selector */}
+                {packages.length > 0 && (
+                  <div className="mb-4">
+                    <PackageSelector
+                      packages={packages}
+                      selectedId={selectedId}
+                      onSelect={setSelectedId}
+                      currency={currency}
+                    />
+                  </div>
+                )}
 
-              {/* Primary CTA — large, full-width, price-aware, subtly pulsing.
-                  When checkout is blocked (not connected / missing bundle mapping)
-                  we drop the href so it renders as a disabled <button> that cannot
-                  navigate, and the onClick guard suppresses the handoff. */}
-              <div className="mt-5">
+                {/* Primary CTA — large, full-width, price-aware, subtly pulsing.
+                    When checkout is blocked (not connected / missing bundle
+                    mapping) we drop the href so it renders as a disabled <button>
+                    that cannot navigate, and the onClick guard suppresses the handoff. */}
                 <Button
                   variant="primary"
                   size="lg"
@@ -249,47 +254,47 @@ export default function HeroSection({
                 >
                   {ctaLabel}
                 </Button>
-              </div>
 
-              {/* Preview / mapping notice — shown only on the commerce-bundle path */}
-              {blockNotice && (
-                <p
-                  role="status"
-                  className="mt-2.5 flex items-center justify-center gap-1.5 text-center text-xs font-medium text-[var(--color-warning)]"
-                >
-                  <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                    <path
-                      fillRule="evenodd"
-                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  {blockNotice}
-                </p>
-              )}
-
-              {/* Social proof line — dynamic, rotates */}
-              <div className="mt-2.5 text-center">
-                <SocialProofBadge />
-              </div>
-
-              {/* Risk reversal short line directly under CTA */}
-              {riskReversal && (
-                <p className="mt-2 text-center text-xs text-[var(--color-text-muted)] flex items-center justify-center gap-1.5">
-                  <svg
-                    className="w-4 h-4 text-[var(--color-success)]"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
+                {/* Preview / mapping notice — shown only on the commerce-bundle path */}
+                {blockNotice && (
+                  <p
+                    role="status"
+                    className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs font-medium text-[var(--color-warning)]"
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  {riskReversal}
-                </p>
-              )}
+                    <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path
+                        fillRule="evenodd"
+                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    {blockNotice}
+                  </p>
+                )}
+
+                {/* Social proof line — dynamic, rotates */}
+                <div className="mt-3 text-center">
+                  <SocialProofBadge />
+                </div>
+
+                {/* Risk reversal short line directly under CTA */}
+                {riskReversal && (
+                  <p className="mt-2.5 text-center text-xs text-[var(--color-text-muted)] flex items-center justify-center gap-1.5">
+                    <svg
+                      className="w-4 h-4 text-[var(--color-success)]"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    {riskReversal}
+                  </p>
+                )}
+              </div>
 
               {/* Delivery / payment strip */}
               {(deliveryInfo || paymentInfo) && (
